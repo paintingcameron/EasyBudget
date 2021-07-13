@@ -1,0 +1,26 @@
+import 'package:easybudget/models/entry.dart';
+import 'package:hive/hive.dart';
+
+class EntryAdaptor extends TypeAdapter<Entry> {
+  @override
+  final typeId = 1;
+
+  @override
+  Entry read(BinaryReader reader) {
+    var amount = reader.readDouble();
+    var desc = reader.readString();
+    var micros = reader.readInt();
+    
+    return Entry(
+        amount, 
+        desc, 
+        DateTime.fromMicrosecondsSinceEpoch(micros));
+  }
+  
+  @override
+  void write(BinaryWriter writer, Entry entry) {
+    writer.writeDouble(entry.amount);
+    writer.writeString(entry.desc);
+    writer.writeInt(entry.date_created.microsecondsSinceEpoch);
+  }
+}

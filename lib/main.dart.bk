@@ -1,0 +1,23 @@
+import 'package:easybudget/bloc/bloc.dart';
+import 'package:easybudget/pages/home.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(EasyBudgetApp());
+
+class EasyBudgetApp extends StatefulWidget {
+  EasyBudgetApp({Key? key}) : super(key: key);
+
+  _EasyBudgetState createState() => _EasyBudgetState();
+}
+
+class _EasyBudgetState extends State<EasyBudgetApp> {
+  late Bloc bloc;
+
+  @override
+  Widget build(BuildContext context) {
+    bloc = Bloc('hive');
+    print('building home state');
+    return HomePage(bloc: bloc);
+  }
+}
