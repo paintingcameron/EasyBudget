@@ -1,8 +1,10 @@
 import 'package:easybudget/bloc/bloc.dart';
+import 'package:easybudget/pages/deniedPermissions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -10,31 +12,39 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late Future<Bloc> _bloc;
+  late Future<dynamic> _bloc_permission;
 
-  Future<Bloc> _getBloc() async {
-    var dir = await getApplicationDocumentsDirectory();
-    Hive.init(dir.path);
-    Bloc bloc = Bloc(await getApplicationDocumentsDirectory());
-    await bloc.init_repo();
-    return bloc;
+  Future<dynamic> _get_bloc_permission() async {
+    if (await Permission.storage.request().isGranted) {
+      var dir = await getApplicationDocumentsDirectory();
+      Hive.init(dir.path);
+      Bloc bloc = Bloc(await getApplicationDocumentsDirectory());
+      await bloc.init_repo();
+      return bloc;
+    } else {
+      return false;
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    _bloc = _getBloc();
+    _bloc_permission = _get_bloc_permission();
   }
 
   @override
   Widget build(BuildContext context) {
     print('building Home page');
-    return FutureBuilder<Bloc>(
-      future: _bloc,
+    return FutureBuilder<dynamic>(
+      future: _bloc_permission,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          Bloc? bloc = snapshot.data;
-          return HomeView(bloc!);
+          if (snapshot.data is Bloc) {
+            Bloc? bloc = snapshot.data;
+            return HomeView(bloc!);
+          } else {
+            return DeniedPermissions();
+          }
         } else {
           return loadingView();
         }
