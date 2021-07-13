@@ -18,6 +18,8 @@ dependencies:
   hive: ^2.0.4
   hive_flutter: ^1.1.0
   bloc: ^7.0.0
+  restart_app: ^1.0.3
+  fluttertoast: ^8.0.7
 
   permission_handler: ^8.1.2
 
