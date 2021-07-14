@@ -1,4 +1,5 @@
 import 'package:easybudget/bloc/bloc.dart';
+import 'package:easybudget/exceptions/api_exceptions.dart';
 import 'package:easybudget/pages/deniedPermissions.dart';
 import 'package:easybudget/widgets/easy_inputs.dart';
 import 'package:easybudget/widgets/easy_widgets.dart';
@@ -18,6 +19,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<dynamic> _bloc_permission;
+  late Bloc bloc;
 
   Future<dynamic> _get_bloc_permission() async {
     if (await Permission.storage.request().isGranted) {
@@ -40,15 +42,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     print('building Home page');
-    return MaterialApp(
-      builder: (context, child) {
-        return FutureBuilder<dynamic>(
+    return FutureBuilder<dynamic>(
           future: _bloc_permission,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               if (snapshot.data is Bloc) {
-                Bloc? bloc = snapshot.data;
-                return HomeView(bloc!);
+                bloc = snapshot.data;
+                return HomeView();
               } else {
                 return DeniedPermissions();
               }
@@ -57,26 +57,21 @@ class _HomePageState extends State<HomePage> {
             }
           },
         );
-      },
-    );
   }
 
-  Widget HomeView(Bloc bloc) {
-    return MaterialApp(
-      builder: (context, child) {
-        return Scaffold(
-          appBar: easy_appbar(),
-          body: Center(
-            child: Column(                                              //Whole screen column
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                easy_stats(bloc),
-                boxed_buttons(),
-              ],
-            ),
-          ),
-        );
-      },
+  Widget HomeView() {
+    return Scaffold(
+      appBar: easy_appbar(),
+      resizeToAvoidBottomInset: false,
+      body: Center(
+        child: Column( //Whole screen column
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            easy_stats(bloc),
+            easy_buttons(),
+          ],
+        ),
+      ),
     );
   }
 
@@ -128,7 +123,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget boxed_buttons() {
+  Widget easy_buttons() {
     return Expanded(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -160,21 +155,32 @@ class _HomePageState extends State<HomePage> {
             // TODO: Handle this case.
               break;
             case button_options.new_entry:
-              var result = await showDialog(
-                                  context: context,
-                                  builder: (context) => EntryDialog());
-              if (result) {
-                Fluttertoast.showToast(
-                    msg: 'New Entry added',
-                    gravity: ToastGravity.BOTTOM,
-                    backgroundColor: Colors.white12,
-                    textColor: Colors.white
-                );
+              List<String> results = await showDialog(
+                context: context,
+                builder: (context) {
+                  return EntryDialog();
+                },
+              );
+              if (results.length == 2) {
+                try {
+                  bloc.new_entry(double.parse(results[1]), results[0]);
+                  Fluttertoast.showToast(
+                      msg: 'New Entry added',
+                      gravity: ToastGravity.BOTTOM,
+                      backgroundColor: Colors.black54,
+                      textColor: Colors.white
+                  );
+                } on negativeBudgetException {
+                  AlertDialog(
+                    title: Text('ERROR'),
+                    content: Text('Budget cannot become negative'),
+                  );
+                }
               } else {
                 Fluttertoast.showToast(
                     msg: 'Canceled',
                     gravity: ToastGravity.BOTTOM,
-                    backgroundColor: Colors.white12,
+                    backgroundColor: Colors.black54,
                     textColor: Colors.white
                 );
               }

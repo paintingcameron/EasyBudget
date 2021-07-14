@@ -11,6 +11,8 @@ void main() => runApp(EasyBudget());
 class EasyBudget extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
-    return HomePage();
+    return MaterialApp(
+      home: HomePage(),
+    );
   }
 }

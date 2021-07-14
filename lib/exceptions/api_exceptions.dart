@@ -22,3 +22,8 @@ class allocatedGreaterThanGoalException implements Exception {
   String cause;
   allocatedGreaterThanGoalException(this.cause);
 }
+
+class negativeBudgetException implements Exception {
+  String cause;
+  negativeBudgetException(this.cause);
+}

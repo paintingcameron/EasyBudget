@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class EntryDialog extends StatefulWidget {
   @override
@@ -7,46 +8,66 @@ class EntryDialog extends StatefulWidget {
 }
 
 class _EntryDialogState extends State<EntryDialog> {
-  double amount = 0;
-  var myController = TextEditingController();
+  var descController = TextEditingController();
+  var amountController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text('New Budget Entry'),
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              maxLines: null,
-              controller: myController,
+      content: Container(
+        height: 200,
+        width: 300,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: Text('Entry Description:'),
+            ),
+            TextField(
+              maxLines: 1,
+              controller: descController,
               keyboardType: TextInputType.multiline,
             ),
-          ),
-          Slider(
-            value: amount,
-            onChanged: (val) {
-              setState(() {
-                amount = val;
-              });
-            }
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.only(top: 40.0),
+              child: Text('Entry Amount:'),
+            ),
+            Row(
+              children: [
+                Text('R'),
+                Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: Container(
+                    width: 80,
+                    child: TextField(
+                      controller: amountController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'[\-0-9]')),
+                        //FilteringTextInputFormatter.digitsOnly,
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
           child: Text('Cancel'),
-          onPressed: () => Navigator.of(context).pop(false),
+          onPressed: () => Navigator.of(context).pop(['']),
         ),
         TextButton(
           child: Text('Save'),
           onPressed: () {
-            print('Desc: ${myController.text}\nAmount: R$amount');
+            //print('Desc: ${descController.text}\nAmount: R ${amountController.text}');
             //TODO: Check if budget entry is valid and save if so
-            Navigator.of(context).pop(true);
+            Navigator.of(context).pop([descController.text, amountController.text]);
           }
         )
       ],

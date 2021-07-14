@@ -18,12 +18,17 @@ List<Entry> get_budget_entries(Box<Entry> entry_box) {
 /// budget is saved to [budget_box].
 Future<Entry> new_entry(Box<Entry> entry_box, Box<double> budget_box,
     double amount, String desc) async {
-  var entry = Entry.newEntry(amount, desc);
-
-  await entry_box.add(entry);
 
   var budget = budget_box.get(globals.budget_key);
   budget ??= 0;
+
+  if (budget + amount < 0) {
+    throw negativeBudgetException('Budget cannot be negative');
+  }
+
+  var entry = Entry.newEntry(amount, desc);
+
+  await entry_box.add(entry);
 
   await budget_box.put(globals.budget_key, (budget + amount));
 
