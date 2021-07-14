@@ -23,7 +23,7 @@ Future<Entry> new_entry(Box<Entry> entry_box, Box<double> budget_box,
   budget ??= 0;
 
   if (budget + amount < 0) {
-    throw negativeBudgetException('Budget cannot be negative');
+    throw new negativeBudgetException('Budget cannot be negative');
   }
 
   var entry = Entry.newEntry(amount, desc);

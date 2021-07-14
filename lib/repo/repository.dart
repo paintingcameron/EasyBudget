@@ -20,6 +20,7 @@ class Repository {
     project_box = await Hive.openBox<Project>(globals.project_box);
     entry_box = await Hive.openBox<Entry>(globals.entries_box);
     budget_box = await Hive.openBox<double>(globals.budget_box);
+
     print('Done initiated boxes');
   }
 

@@ -163,7 +163,7 @@ class _HomePageState extends State<HomePage> {
               );
               if (results.length == 2) {
                 try {
-                  bloc.new_entry(double.parse(results[1]), results[0]);
+                  await bloc.new_entry(double.parse(results[1]), results[0]);
                   Fluttertoast.showToast(
                       msg: 'New Entry added',
                       gravity: ToastGravity.BOTTOM,
@@ -171,9 +171,19 @@ class _HomePageState extends State<HomePage> {
                       textColor: Colors.white
                   );
                 } on negativeBudgetException {
-                  AlertDialog(
-                    title: Text('ERROR'),
-                    content: Text('Budget cannot become negative'),
+                  print('negative budget exception thrown');
+                  await Future.delayed(Duration(milliseconds: 500));
+                  await showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                          title: Text('ERROR'),
+                          content: Text('Budget cannot be negative'),
+                          actions: [
+                            TextButton(
+                                onPressed: () => Navigator.of(context).pop() ,
+                                child: Text('ok')),
+                          ],
+                        ),
                   );
                 }
               } else {

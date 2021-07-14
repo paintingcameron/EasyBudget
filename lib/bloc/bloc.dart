@@ -45,7 +45,7 @@ class Bloc {
 
     budget_controller = Money_Controller(budget);
     required_controller = Money_Controller(required);
-    unallocated_controller = Money_Controller(allocated);
+    unallocated_controller = Money_Controller(budget - allocated);
 
     print('Done initializing repo');
   }
@@ -77,10 +77,15 @@ class Bloc {
   }
 
   void sinkUnallocated() {
-    var allocated = repo.budget_box.get(globals.allocated_key);
     var budget = repo.budget_box.get(globals.budget_key);
-    allocated ??= 0;
+    var allocated = repo.budget_box.get(globals.allocated_key);
     budget ??= 0;
+    allocated ??= 0;
+
+    print('budget: $budget');
+    print('allocated: $allocated');
+
+    print('new unallocated amount: ${budget - allocated}');
     unallocated_controller.sinkValue(budget - allocated);
   }
 
