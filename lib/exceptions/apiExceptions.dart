@@ -1,8 +1,3 @@
-class nameExistsException implements Exception {
-  String cause;
-  nameExistsException(this.cause);
-}
-
 class keyDoesNotExistException implements Exception {
   String cause;
   keyDoesNotExistException(this.cause);

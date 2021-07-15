@@ -49,18 +49,13 @@ List<Project> get_open_closed_projects(List<Project> projects, bool open) {
   return filtered;
 }
 
-/// Creates a new project and adds it to a Hive box
-///
-/// Throws a [nameExistsException] if the [name] of the project already exists.
-/// Otherwise the created project is returned.
+/// Creates a new project with the given [name], [desc] and [goal]. Adds it to a Hive box and
+/// updates the budget box accordingly
 Future<Project> new_project(Box<Project> project_box, Box<double> budget_box,
     String name, String desc, double goal) async {
-  if (project_box.containsKey(name)) {
-    throw nameExistsException('The name: $name already exists');
-  }
 
   var project = Project(name, desc, goal);
-  await project_box.put(project.name, project);
+  await project_box.add(project);
 
   var required = budget_box.get(globals.required_key);
   required ??= 0;
@@ -72,14 +67,14 @@ Future<Project> new_project(Box<Project> project_box, Box<double> budget_box,
 
 /// Attempts to delete a project from a Hive box
 ///
-/// Throws [keyDoesNotExistException] if the given [name] does not exist in the Hive projects box.
+/// Throws [keyDoesNotExistException] if the given [id] does not exist in the Hive projects box.
 /// Otherwise the operation succeeds silently.
-void delete_project(Box<Project> project_box, Box<double> budget_box, String name) async {
-  if (!project_box.containsKey(name)) {
-    throw keyDoesNotExistException('The given name: $name does not exist in the projects hive');
+void delete_project(Box<Project> project_box, Box<double> budget_box, int id) async {
+  if (!project_box.containsKey(id)) {
+    throw keyDoesNotExistException('The given key: $id does not exist in the projects hive');
   }
 
-  var project = project_box.get(name);
+  var project = project_box.get(id);
 
   var required = budget_box.get(globals.required_key);
   var allocated = budget_box.get(globals.allocated_key);
@@ -92,7 +87,7 @@ void delete_project(Box<Project> project_box, Box<double> budget_box, String nam
   await budget_box.put(globals.required_key, required);
   await budget_box.put(globals.allocated_key, allocated);
 
-  await project_box.delete(name);
+  await project_box.delete(id);
 }
 
 /// Deletes all projects from the Hive box
@@ -106,13 +101,12 @@ void delete_all_projects(Box<Project> project_box) async {
 /// is greater than the goal for the [project] then [allocatedGreaterThanGoalException] is thrown.
 /// If [amount] is greater than the amount of available budget unallocated [lackOfAvailableBudget]
 /// is thrown.
-void add_to_allocated(Box<Project> project_box, Box<double> budget_box,
-    String name, double amount) {
+void add_to_allocated(Box<Project> project_box, Box<double> budget_box, int id, double amount) {
   if (amount < 0) {
     throw negativeAllocationException('Allocated amount of R$amount cannot be negative');
   }
 
-  var project = project_box.get(name);
+  var project = project_box.get(id);
 
   if (amount > project!.goal) {
     throw allocatedGreaterThanGoalException('Cannot allocate R$amount to a project with goal: '
@@ -138,9 +132,8 @@ void add_to_allocated(Box<Project> project_box, Box<double> budget_box,
 }
 
 /// Assigns the goal project with the given [name] to [new_goal] and saves the affects to the
-void edit_goal(Box<Project> project_box, Box<double> budget_box,
-    String name, double new_goal) {
-  var project = project_box.get(name);
+void edit_goal(Box<Project> project_box, Box<double> budget_box, int id, double new_goal) {
+  var project = project_box.get(id);
 
   var required = budget_box.get(globals.required_key);
   required ??= 0;
