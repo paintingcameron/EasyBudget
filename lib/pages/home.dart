@@ -1,14 +1,15 @@
 import 'package:easybudget/bloc/bloc.dart';
-import 'package:easybudget/exceptions/api_exceptions.dart';
+import 'package:easybudget/exceptions/apiExceptions.dart';
 import 'package:easybudget/pages/deniedPermissions.dart';
-import 'package:easybudget/widgets/easy_inputs.dart';
-import 'package:easybudget/widgets/easy_widgets.dart';
+import 'package:easybudget/pages/newProjectPage.dart';
+import 'package:easybudget/widgets/easyInputs.dart';
+import 'package:easybudget/widgets/easyWidgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:easybudget/widgets/easy_appbars.dart';
+import 'package:easybudget/widgets/easyAppBars.dart';
 import 'package:easybudget/globals.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -61,7 +62,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget HomeView() {
     return Scaffold(
-      appBar: easy_appbar(),
+      appBar: easyAppBar(),
       resizeToAvoidBottomInset: false,
       body: Center(
         child: Column( //Whole screen column
@@ -171,7 +172,6 @@ class _HomePageState extends State<HomePage> {
                       textColor: Colors.white
                   );
                 } on negativeBudgetException {
-                  print('negative budget exception thrown');
                   await Future.delayed(Duration(milliseconds: 500));
                   await showDialog(
                       context: context,
@@ -196,7 +196,14 @@ class _HomePageState extends State<HomePage> {
               }
               break;
             case button_options.new_project:
-            // TODO: Handle this case.
+              var results = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NewProjectPage(),
+                ),
+              );
+
+              print('Results: $results');
               break;
           }
         },

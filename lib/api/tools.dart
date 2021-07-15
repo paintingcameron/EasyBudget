@@ -1,4 +1,4 @@
-import 'package:easybudget/exceptions/api_exceptions.dart';
+import 'package:easybudget/exceptions/apiExceptions.dart';
 import 'package:easybudget/models/entry.dart';
 import 'package:easybudget/models/project.dart';
 import 'package:hive/hive.dart';

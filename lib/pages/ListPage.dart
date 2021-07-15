@@ -1,7 +1,7 @@
-import 'package:easybudget/widgets/easy_widgets.dart';
+import 'package:easybudget/widgets/easyWidgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:easybudget/widgets/easy_appbars.dart';
+import 'package:easybudget/widgets/easyAppBars.dart';
 
 abstract class ListPage<T> extends StatelessWidget{
   Stream<T> list_stream;
@@ -24,7 +24,7 @@ abstract class ListPage<T> extends StatelessWidget{
   Widget build(BuildContext context) {
     return Material(
       child: Scaffold(
-        appBar: easy_appbar_back(context),
+        appBar: easyAppBar_back(),
         body: StreamBuilder(
           builder: (context, AsyncSnapshot<List<T>> snapshot) {
             if (snapshot.hasData) {
