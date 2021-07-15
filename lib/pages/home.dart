@@ -1,5 +1,6 @@
 import 'package:easybudget/bloc/bloc.dart';
 import 'package:easybudget/exceptions/apiExceptions.dart';
+import 'package:easybudget/pages/listPages.dart';
 import 'package:easybudget/pages/deniedPermissions.dart';
 import 'package:easybudget/pages/newProjectPage.dart';
 import 'package:easybudget/widgets/easyInputs.dart';
@@ -147,13 +148,30 @@ class _HomePageState extends State<HomePage> {
         onPressed: () async {
           switch (opt) {
             case button_options.open_projects:
-            // TODO: Handle this case.
+              bloc.open_projects = true;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProjectListPage(bloc),
+                ),
+              );
               break;
             case button_options.closed_projects:
-            // TODO: Handle this case.
+              bloc.open_projects = false;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProjectListPage(bloc),
+                )
+              );
               break;
             case button_options.budget_entries:
-            // TODO: Handle this case.
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => EntryListPage(bloc),
+                ),
+              );
               break;
             case button_options.new_entry:
               List<String> results = await showDialog(
@@ -166,26 +184,50 @@ class _HomePageState extends State<HomePage> {
                 try {
                   await bloc.new_entry(double.parse(results[1]), results[0]);
                   Fluttertoast.showToast(
-                      msg: 'New Entry added',
-                      gravity: ToastGravity.BOTTOM,
-                      backgroundColor: Colors.black54,
-                      textColor: Colors.white
+                    msg: 'New Entry added',
+                    gravity: ToastGravity.BOTTOM,
+                    backgroundColor: Colors.black54,
+                    textColor: Colors.white
                   );
                 } on negativeBudgetException {
                   await Future.delayed(Duration(milliseconds: 500));
                   await showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                          title: Text('ERROR'),
-                          content: Text('Budget cannot be negative'),
-                          actions: [
-                            TextButton(
-                                onPressed: () => Navigator.of(context).pop() ,
-                                child: Text('ok')),
-                          ],
-                        ),
+                        title: Text('ERROR'),
+                        content: Text('Budget cannot be negative'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop() ,
+                            child: Text('ok')),
+                        ],
+                      ),
                   );
                 }
+              } else {
+                Fluttertoast.showToast(
+                  msg: 'Canceled',
+                  gravity: ToastGravity.BOTTOM,
+                  backgroundColor: Colors.black54,
+                  textColor: Colors.white
+                );
+              }
+              break;
+            case button_options.new_project:
+              List<dynamic> results = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NewProjectPage(),
+                ),
+              );
+              if (results.length == 3) {
+                await bloc.new_project(results[0], results[1], double.parse(results[2]));
+                Fluttertoast.showToast(
+                  msg: 'New Project: ${results[0]}',
+                  gravity: ToastGravity.BOTTOM,
+                  backgroundColor: Colors.black54,
+                  textColor: Colors.white,
+                );
               } else {
                 Fluttertoast.showToast(
                     msg: 'Canceled',
@@ -194,16 +236,6 @@ class _HomePageState extends State<HomePage> {
                     textColor: Colors.white
                 );
               }
-              break;
-            case button_options.new_project:
-              var results = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => NewProjectPage(),
-                ),
-              );
-
-              print('Results: $results');
               break;
           }
         },

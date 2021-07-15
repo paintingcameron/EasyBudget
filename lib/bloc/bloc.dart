@@ -15,7 +15,7 @@ class Bloc {
   late final Money_Controller budget_controller;
   late final Money_Controller required_controller;
   late final Money_Controller unallocated_controller;
-  late var open_projects;
+  late bool open_projects;
 
   Bloc(var path) {
     print('starting to initialize bloc');
@@ -32,9 +32,6 @@ class Bloc {
   Future<void> init_repo() async {
     print('Initializing repo');
     await repo.init_boxes();
-
-    sinkProjects();
-    sinkAllEntries();
 
     var budget = repo.budget_box.get(globals.budget_key);
     var required = repo.budget_box.get(globals.required_key);
@@ -93,25 +90,23 @@ class Bloc {
     await api.new_project(repo.project_box, repo.budget_box, name, desc, goal);
 
     sinkRequired();
-    sinkProjects();
   }
 
-  void delete_project(String name) {
-    api.delete_project(repo.project_box, repo.budget_box, name);
+  void delete_project(int id) {
+    api.delete_project(repo.project_box, repo.budget_box, id);
 
     sinkRequired();
     sinkUnallocated();
-    sinkProjects();
   }
 
-  void add_to_allocated(String name, double amount) {
-    api.add_to_allocated(repo.project_box, repo.budget_box, name, amount);
+  void add_to_allocated(int id, double amount) {
+    api.add_to_allocated(repo.project_box, repo.budget_box, id, amount);
 
     sinkUnallocated();
   }
 
-  void edit_goal(String name, double newGoal) {
-    api.edit_goal(repo.project_box, repo.budget_box, name, newGoal);
+  void edit_goal(int id, double newGoal) {
+    api.edit_goal(repo.project_box, repo.budget_box, id, newGoal);
 
     sinkRequired();
   }
@@ -121,7 +116,6 @@ class Bloc {
 
     sinkBudget();
     sinkUnallocated();
-    sinkAllEntries();
   }
 
   void dispose()  {
@@ -134,7 +128,7 @@ class Bloc {
 }
 
 class StreamList<T> {
-  final StreamController <List<T>> _controller = StreamController();
+  final StreamController <List<T>> _controller = StreamController.broadcast();
 
   Stream<List<T>> get stream => _controller.stream;
 

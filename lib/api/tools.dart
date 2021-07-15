@@ -41,7 +41,7 @@ List<Project> get_open_closed_projects(List<Project> projects, bool open) {
   var filtered = <Project>[];
 
   for (var project in projects) {
-    if (project.bought == open) {
+    if (project.bought != open) {
       filtered.add(project);
     }
   }
