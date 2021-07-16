@@ -1,16 +1,5 @@
-# easybudget
+# Easy Budget
 
-Mobile implementaion of EasyBudget
+Light weight Flutter made application for budget management mainly aimed at students.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The idea is to create 'projects' which are items that you wish to buy, with a goal and the amount allocated to that project. By adding to your budget you can then allocate that budget to your various projects. Once a goal is met, you know that you can buy that item and that the money is coming directly from your savings (or whatever account you're representing the Budget as.
