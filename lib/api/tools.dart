@@ -69,7 +69,7 @@ Future<Project> new_project(Box<Project> project_box, Box<double> budget_box,
 ///
 /// Throws [keyDoesNotExistException] if the given [id] does not exist in the Hive projects box.
 /// Otherwise the operation succeeds silently.
-void delete_project(Box<Project> project_box, Box<double> budget_box, int id) async {
+Future<void> delete_project(Box<Project> project_box, Box<double> budget_box, int id) async {
   if (!project_box.containsKey(id)) {
     throw keyDoesNotExistException('The given key: $id does not exist in the projects hive');
   }
@@ -88,6 +88,7 @@ void delete_project(Box<Project> project_box, Box<double> budget_box, int id) as
   await budget_box.put(globals.allocated_key, allocated);
 
   await project_box.delete(id);
+  print('Project: ${project.name} deleted');
 }
 
 /// Deletes all projects from the Hive box
@@ -102,9 +103,6 @@ void delete_all_projects(Box<Project> project_box) async {
 /// If [amount] is greater than the amount of available budget unallocated [lackOfAvailableBudget]
 /// is thrown.
 void add_to_allocated(Box<Project> project_box, Box<double> budget_box, int id, double amount) {
-  if (amount < 0) {
-    throw negativeAllocationException('Allocated amount of R$amount cannot be negative');
-  }
 
   var project = project_box.get(id);
 
@@ -122,6 +120,10 @@ void add_to_allocated(Box<Project> project_box, Box<double> budget_box, int id, 
   if ((budget - allocated) < amount) {
     throw lackOfAvailableBudget('Not enough available budget to allocate.'
         '\nAvailable budget: R${budget-allocated}');
+  }
+
+  if (allocated + amount < 0) {
+    throw negativeAllocationException('Allocated amount cannot be negative');
   }
 
   allocated += amount;

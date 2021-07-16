@@ -52,6 +52,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                         maxLines: 1,
                         controller: nameController,
                         keyboardType: TextInputType.text,
+                        inputFormatters: [LengthLimitingTextInputFormatter(18)],
                         validator: (name) {
                           if (name == null || name.isEmpty) {
                             return 'Please enter a project name';

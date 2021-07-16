@@ -18,19 +18,15 @@ class Bloc {
   late bool open_projects;
 
   Bloc(var path) {
-    print('starting to initialize bloc');
     projects = StreamList<Project>();
     entries = StreamList<Entry>();
-    print('created stream lists');
 
     open_projects = true;
 
     repo = Repository();
-    print('Initialized bloc object');
   }
 
   Future<void> init_repo() async {
-    print('Initializing repo');
     await repo.init_boxes();
 
     var budget = repo.budget_box.get(globals.budget_key);
@@ -43,8 +39,6 @@ class Bloc {
     budget_controller = Money_Controller(budget);
     required_controller = Money_Controller(required);
     unallocated_controller = Money_Controller(budget - allocated);
-
-    print('Done initializing repo');
   }
 
   Stream<List<Project>> get projects_stream => projects.stream;
@@ -79,10 +73,6 @@ class Bloc {
     budget ??= 0;
     allocated ??= 0;
 
-    print('budget: $budget');
-    print('allocated: $allocated');
-
-    print('new unallocated amount: ${budget - allocated}');
     unallocated_controller.sinkValue(budget - allocated);
   }
 
@@ -92,11 +82,12 @@ class Bloc {
     sinkRequired();
   }
 
-  void delete_project(int id) {
-    api.delete_project(repo.project_box, repo.budget_box, id);
+  void delete_project(int id) async {
+    await api.delete_project(repo.project_box, repo.budget_box, id);
 
     sinkRequired();
     sinkUnallocated();
+    sinkProjects();
   }
 
   void add_to_allocated(int id, double amount) {
@@ -160,7 +151,6 @@ class Money_Controller {
   Money_Controller(double value) {
     this.value = value;
     sinkValue(value);
-    print('initiating money controller');
   }
 
   Stream<double> get stream => _controller.stream;

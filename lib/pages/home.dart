@@ -14,6 +14,14 @@ import 'package:easybudget/widgets/easyAppBars.dart';
 import 'package:easybudget/globals.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+enum button_options {
+  open_projects,
+  closed_projects,
+  budget_entries,
+  new_entry,
+  new_project
+}
+
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
@@ -21,13 +29,12 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<dynamic> _bloc_permission;
-  late Bloc bloc;
 
   Future<dynamic> _get_bloc_permission() async {
     if (await Permission.storage.request().isGranted) {
       var dir = await getApplicationDocumentsDirectory();
       Hive.init(dir.path);
-      Bloc bloc = Bloc(await getApplicationDocumentsDirectory());
+      bloc = Bloc(await getApplicationDocumentsDirectory());
       await bloc.init_repo();
       return bloc;
     } else {
@@ -43,7 +50,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    print('building Home page');
     return FutureBuilder<dynamic>(
           future: _bloc_permission,
           builder: (context, snapshot) {
@@ -84,15 +90,13 @@ class _HomePageState extends State<HomePage> {
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 30, bottom: 10),
-          child: Text(
-            'Total Budget:',
-            style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
-          ),
+          child: Text('Total Budget', style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),),
         ),
         StreamBuilder(
           stream: bloc.budget_stream,
           builder: (context, budget_shot) => Text(
-            "R ${budget_shot.data}", style: TextStyle(fontSize: 30),),
+            '$currency ${budget_shot.data}',
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),),
         ),
         SizedBox(
           height: 20,
@@ -118,7 +122,7 @@ class _HomePageState extends State<HomePage> {
           stream: stream,
           builder: (context, snapshot) => Padding(
             padding: const EdgeInsets.only(top:8.0),
-            child: Text('R ${snapshot.data}'),
+            child: Text('$currency ${snapshot.data}'),
           ),
         ),
       ],
@@ -152,7 +156,7 @@ class _HomePageState extends State<HomePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ProjectListPage(bloc),
+                  builder: (context) => ProjectListPage(),
                 ),
               );
               break;
@@ -161,7 +165,7 @@ class _HomePageState extends State<HomePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ProjectListPage(bloc),
+                  builder: (context) => ProjectListPage(),
                 )
               );
               break;
@@ -169,7 +173,7 @@ class _HomePageState extends State<HomePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => EntryListPage(bloc),
+                    builder: (context) => EntryListPage(),
                 ),
               );
               break;
@@ -249,5 +253,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+
 }
 

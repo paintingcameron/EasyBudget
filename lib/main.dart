@@ -13,6 +13,19 @@ class EasyBudget extends StatelessWidget{
   Widget build(BuildContext context) {
     return MaterialApp(
       home: HomePage(),
+      theme: ThemeData(
+        primaryColor: Colors.green,
+        accentColor: Colors.green,
+        buttonColor: Colors.green,
+        buttonTheme: ButtonThemeData(
+          buttonColor: Colors.green,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData (
+          style: ElevatedButton.styleFrom(
+            primary: Colors.green,
+          ),
+        )
+      ),
     );
   }
 }

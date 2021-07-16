@@ -1,4 +1,5 @@
 import 'package:easybudget/bloc/bloc.dart';
+import 'package:easybudget/globals.dart';
 import 'package:easybudget/models/entry.dart';
 import 'package:easybudget/models/project.dart';
 import 'package:easybudget/pages/projectPage.dart';
@@ -6,11 +7,9 @@ import 'package:easybudget/widgets/easyWidgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:easybudget/widgets/easyAppBars.dart';
+import 'package:intl/intl.dart';
 
 class ProjectListPage extends StatelessWidget {
-  final Bloc _bloc;
-
-  ProjectListPage(this._bloc);
 
   Widget getListView(List<Project> lst, BuildContext context) {
     return ListView.builder(
@@ -35,6 +34,13 @@ class ProjectListPage extends StatelessWidget {
         child: ListTile(
           title: Text('${project.name}'),
           subtitle: Text('${project.desc}'),
+          trailing: Text(
+            '$currency ${project.allocated} / $currency ${project.goal}',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          ),
         ),
       ),
     );
@@ -43,14 +49,14 @@ class ProjectListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: easyAppBar(),
+      appBar: easyAppBar_title('Projects'),
       body: StreamBuilder<List<Project>>(
-        stream: _bloc.projects_stream,
+        stream: bloc.projects_stream,
         builder: (context, AsyncSnapshot<List<Project>> snapshot) {
           if (snapshot.hasData) {
             return getListView(snapshot.data!, context);
           } else {
-            _bloc.sinkProjects();
+            bloc.sinkProjects();
             return loadingView();
           }
         },
@@ -60,9 +66,6 @@ class ProjectListPage extends StatelessWidget {
 }
 
 class EntryListPage extends StatelessWidget {
-  final Bloc _bloc;
-
-  EntryListPage(this._bloc);
 
   Widget getListView(List<Entry> lst) {
     return ListView.builder(
@@ -76,8 +79,15 @@ class EntryListPage extends StatelessWidget {
   Widget getListItem(Entry item) {
     return Card(
       child: ListTile(
-        title: Text('\$ ${item.amount}'),
-        subtitle: Text(item.desc),
+        title: Text(item.desc),
+        subtitle: Text('${DateFormat('dd/mm/yyyy').format(item.date_created)}'),
+        trailing: Text(
+          '$currency ${item.amount}',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
       ),
     );
   }
@@ -86,14 +96,14 @@ class EntryListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       child: Scaffold(
-        appBar: easyAppBar_back(),
+        appBar: easyAppBar_title('Entries'),
         body: StreamBuilder<List<Entry>>(
-          stream: _bloc.entries_stream,
+          stream: bloc.entries_stream,
           builder: (context, AsyncSnapshot<List<Entry>> snapshot) {
             if (snapshot.hasData) {
               return getListView(snapshot.data!);
             } else {
-              _bloc.sinkAllEntries();
+              bloc.sinkAllEntries();
               return loadingView();
             }
           },

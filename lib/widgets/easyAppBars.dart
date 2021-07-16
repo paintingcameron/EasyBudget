@@ -15,6 +15,14 @@ AppBar easyAppBar() {
   );
 }
 
+AppBar easyAppBar_title(String title) {
+  return AppBar(
+    centerTitle: true,
+    toolbarHeight: 50,
+    title: Text(title),
+  );
+}
+
 AppBar easyAppBar_back() {
   return AppBar(
     leading: Builder(

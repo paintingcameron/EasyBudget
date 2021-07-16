@@ -20,6 +20,7 @@ dependencies:
   bloc: ^7.0.0
   restart_app: ^1.0.3
   fluttertoast: ^8.0.7
+  intl: 0.17.0
 
   permission_handler: ^8.1.2
 
@@ -32,9 +33,17 @@ dev_dependencies:
   hive_generator: ^1.1.0
   build_runner: ^2.0.6
 
+  flutter_launcher_icons: ^0.9.0
+
+flutter_icons:
+  android: 'launcher_icon'
+  ios: false
+  image_path: 'assets/images/easy_budget_launcher_icon.png'
+
 
 flutter:
-
   uses-material-design: true
 
-
+  assets:
+    - easy_budget_background.jpg
+    - easy_budget_launcher_icon.png
