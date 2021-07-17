@@ -145,3 +145,32 @@ void edit_goal(Box<Project> project_box, Box<double> budget_box, int id, double 
   project.goal = new_goal;
   project.save();
 }
+
+void mark_bought(Box<Project> project_box, Box<double> budget_box, int id, bool bought) {
+  var project = project_box.get(id);
+
+  var budget = budget_box.get(globals.budget_key);
+  var required = budget_box.get(globals.required_key);
+  var allocated = budget_box.get(globals.allocated_key);
+
+  budget ??= 0;
+  required ??= 0;
+  allocated ??= 0;
+
+  if (bought) {
+    budget -= project!.goal;
+    required -= project.goal;
+    allocated -= project.goal;
+  } else {
+    budget += project!.goal;
+    required += project.goal;
+    allocated += project.goal;
+  }
+
+  budget_box.put(globals.budget_key, budget);
+  budget_box.put(globals.required_key, required);
+  budget_box.put(globals.allocated_key, allocated);
+
+  project.bought = bought;
+  project.save();
+}

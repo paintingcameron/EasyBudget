@@ -76,7 +76,8 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             easy_stats(bloc),
-            easy_buttons(),
+            SizedBox(height: 50,),
+            easyGridButtons(),
           ],
         ),
       ),
@@ -129,6 +130,149 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget easyGridButtons() {
+    return Expanded(
+      child: GridView.count(
+        crossAxisCount: 3,
+        mainAxisSpacing: 20,
+        children: [
+          gridButton(button_options.open_projects),
+          gridButton(button_options.new_project),
+          Column(
+            children: [
+              IconButton(
+                iconSize: 95,
+                icon: Image.asset('assets/images/deposit_icon.png'),
+                onPressed: () async {
+                  List<String> results = await showDialog(
+                    context: context,
+                    builder: (context) {
+                      return EntryDialog();
+                    },
+                  );
+                  if (results.length == 2) {
+                    try {
+                      await bloc.new_entry(double.parse(results[1]), results[0]);
+                      Fluttertoast.showToast(
+                          msg: 'New Entry added',
+                          gravity: ToastGravity.BOTTOM,
+                          backgroundColor: Colors.black54,
+                          textColor: Colors.white
+                      );
+                    } on negativeBudgetException {
+                      await Future.delayed(Duration(milliseconds: 500));
+                      await showDialog(
+                          context: context,
+                          builder: (context) =>
+                          AlertDialog(
+                            title: Text('ERROR'),
+                            content: Text('Budget cannot be negative'),
+                            actions: [
+                              TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: Text('ok')),
+                            ],
+                          ),
+                  );
+                  }
+                  } else {
+                  Fluttertoast.showToast(
+                  msg: 'Canceled',
+                  gravity: ToastGravity.BOTTOM,
+                  backgroundColor: Colors.black54,
+                  textColor: Colors.white
+                  );
+                  }
+                },
+              ),
+              SizedBox(height: 5,),
+              Text('Deposit'),
+            ],
+          ),
+          gridButton(button_options.closed_projects),
+          gridButton(button_options.budget_entries),
+        ],
+      ),
+    );
+  }
+
+  Widget gridButton(button_options opt) {
+    return Column(
+      children: [
+        IconButton(
+          iconSize: 100,
+          icon: (opt == button_options.new_project) ? Icon(Icons.add_box_rounded) :
+                (opt == button_options.open_projects) ? Icon(Icons.construction_rounded) :
+                (opt == button_options.closed_projects) ? Icon(Icons.verified_rounded) :
+                Icon(Icons.payments),
+          onPressed: () async {
+            switch (opt) {
+              case button_options.open_projects:
+                bloc.open_projects = true;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProjectListPage(true),
+                  ),
+                );
+                break;
+              case button_options.closed_projects:
+                bloc.open_projects = false;
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProjectListPage(false),
+                    )
+                );
+                break;
+              case button_options.budget_entries:
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EntryListPage(),
+                  ),
+                );
+                break;
+              case button_options.new_entry:
+
+                break;
+              case button_options.new_project:
+                List<dynamic> results = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => NewProjectPage(),
+                  ),
+                );
+                if (results.length == 3) {
+                  await bloc.new_project(results[0], results[1], double.parse(results[2]));
+                  Fluttertoast.showToast(
+                    msg: 'New Project: ${results[0]}',
+                    gravity: ToastGravity.BOTTOM,
+                    backgroundColor: Colors.black54,
+                    textColor: Colors.white,
+                  );
+                } else {
+                  Fluttertoast.showToast(
+                      msg: 'Canceled',
+                      gravity: ToastGravity.BOTTOM,
+                      backgroundColor: Colors.black54,
+                      textColor: Colors.white
+                  );
+                }
+                break;
+            }
+          },
+        ),
+        Text(
+          (opt == button_options.open_projects) ? 'Open Projects' :
+          (opt == button_options.closed_projects)? 'Closed Projects' :
+          (opt == button_options.budget_entries)? 'Deposits' :
+          (opt == button_options.new_entry)? 'New Entry' : 'New Project',
+        )
+      ],
+    );
+  }
+
   Widget easy_buttons() {
     return Expanded(
       child: Column(
@@ -156,7 +300,7 @@ class _HomePageState extends State<HomePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ProjectListPage(),
+                  builder: (context) => ProjectListPage(true),
                 ),
               );
               break;
@@ -165,7 +309,7 @@ class _HomePageState extends State<HomePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ProjectListPage(),
+                  builder: (context) => ProjectListPage(false),
                 )
               );
               break;

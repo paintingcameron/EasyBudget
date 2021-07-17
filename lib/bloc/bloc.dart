@@ -94,12 +94,24 @@ class Bloc {
     api.add_to_allocated(repo.project_box, repo.budget_box, id, amount);
 
     sinkUnallocated();
+    sinkProjects();
   }
 
   void edit_goal(int id, double newGoal) {
     api.edit_goal(repo.project_box, repo.budget_box, id, newGoal);
 
     sinkRequired();
+    sinkProjects();
+  }
+
+  void mark_bought(int id, bool bought) {
+    api.mark_bought(repo.project_box, repo.budget_box, id, bought);
+
+    sinkBudget();
+    sinkRequired();
+    sinkUnallocated();
+
+    sinkProjects();
   }
 
   Future<void> new_entry(double amount, String desc) async {

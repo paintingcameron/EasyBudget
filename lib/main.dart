@@ -6,6 +6,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'pages/deniedPermissions.dart';
 
+final int moneyGreen = 0xFF00b74c;
+
 void main() => runApp(EasyBudget());
 
 class EasyBudget extends StatelessWidget{
@@ -14,17 +16,23 @@ class EasyBudget extends StatelessWidget{
     return MaterialApp(
       home: HomePage(),
       theme: ThemeData(
-        primaryColor: Colors.green,
-        accentColor: Colors.green,
-        buttonColor: Colors.green,
+        primaryColor: Color(moneyGreen,),
+        accentColor: Color(moneyGreen),
+        buttonColor: Color(moneyGreen),
         buttonTheme: ButtonThemeData(
-          buttonColor: Colors.green,
+          buttonColor: Color(moneyGreen),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData (
           style: ElevatedButton.styleFrom(
-            primary: Colors.green,
+            primary: Color(moneyGreen),
           ),
-        )
+        ),
+        iconTheme: IconThemeData(
+          color: Color(moneyGreen),
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          foregroundColor: Colors.white,
+        ),
       ),
     );
   }

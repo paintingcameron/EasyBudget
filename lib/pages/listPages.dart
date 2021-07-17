@@ -10,6 +10,9 @@ import 'package:easybudget/widgets/easyAppBars.dart';
 import 'package:intl/intl.dart';
 
 class ProjectListPage extends StatelessWidget {
+  bool open;
+
+  ProjectListPage(this.open);
 
   Widget getListView(List<Project> lst, BuildContext context) {
     return ListView.builder(
@@ -49,7 +52,7 @@ class ProjectListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: easyAppBar_title('Projects'),
+      appBar: easyAppBar_title('${(open) ? 'Open' : 'Closed '} Projects'),
       body: StreamBuilder<List<Project>>(
         stream: bloc.projects_stream,
         builder: (context, AsyncSnapshot<List<Project>> snapshot) {
@@ -96,7 +99,7 @@ class EntryListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       child: Scaffold(
-        appBar: easyAppBar_title('Entries'),
+        appBar: easyAppBar_title('Deposits'),
         body: StreamBuilder<List<Entry>>(
           stream: bloc.entries_stream,
           builder: (context, AsyncSnapshot<List<Entry>> snapshot) {

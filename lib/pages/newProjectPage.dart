@@ -7,14 +7,23 @@ import 'package:flutter/services.dart';
 
 class NewProjectPage extends StatefulWidget {
   @override
-  _NewProjectPageState createState() => _NewProjectPageState();
+  _NewProjectPageState createState() => _NewProjectPageState('New Project');
 }
 
 class _NewProjectPageState extends State<NewProjectPage> {
   TextEditingController nameController = new TextEditingController();
   TextEditingController descController = new TextEditingController();
-  TextEditingController goalController = new TextEditingController();
+  TextEditingController amountController = new TextEditingController();
   GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+
+  String title;
+
+  _NewProjectPageState(this.title);
+  
+  @override
+  void initState() {
+    amountController = TextEditingController(text: 'Project Goal');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,75 +36,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                height: 220,
-                alignment: Alignment.center,
-                child: Text(
-                  'New Project',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 60
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          labelText: 'Project Name *',
-                        ),
-                        maxLines: 1,
-                        controller: nameController,
-                        keyboardType: TextInputType.text,
-                        inputFormatters: [LengthLimitingTextInputFormatter(18)],
-                        validator: (name) {
-                          if (name == null || name.isEmpty) {
-                            return 'Please enter a project name';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 30,),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          labelText: 'Project Description',
-                        ),
-                        controller: descController,
-                        maxLines: 5,
-                        keyboardType: TextInputType.multiline,
-                        validator: (desc) {
-                          if (desc == null || desc.isEmpty) {
-                            return 'Please enter a description';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 30,),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          labelText: 'Project Goal',
-                          icon: Icon(Icons.attach_money_sharp),
-                        ),
-                        controller: goalController,
-                        maxLines: 1,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly,],
-                        validator: (goal) {
-                          if (goal == null || goal.isEmpty) {
-                            return 'Please enter a goal';
-                          }
-                          return null;
-                        },
-                      )
-                    ],
-                  ),
-                ),
-              ),
+              pageTitle(title),
+              projectForm('Goal'),
             ],
           ),
         ),
@@ -118,7 +60,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
               heroTag: 'btn_save',
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  Navigator.of(context).pop([nameController.text, descController.text, goalController.text]);
+                  Navigator.of(context).pop([nameController.text, descController.text, amountController.text]);
                 } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -131,6 +73,80 @@ class _NewProjectPageState extends State<NewProjectPage> {
           ],
         ),
       ):null,
+    );
+  }
+
+  Widget pageTitle(String title) {
+    return Container(
+      height: 220,
+      alignment: Alignment.center,
+      child: Text(
+        'New Project',
+        style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 60
+        ),
+      ),
+    );
+  }
+
+  Widget projectForm(String amountTitle) {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextFormField(
+              decoration: const InputDecoration(
+                labelText: 'Project Name *',
+              ),
+              maxLines: 1,
+              controller: nameController,
+              keyboardType: TextInputType.text,
+              inputFormatters: [LengthLimitingTextInputFormatter(18)],
+              validator: (name) {
+                if (name == null || name.isEmpty) {
+                  return 'Please enter a project name';
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: 30,),
+            TextFormField(
+              decoration: const InputDecoration(
+                labelText: 'Project Description',
+              ),
+              controller: descController,
+              maxLines: 5,
+              keyboardType: TextInputType.multiline,
+              validator: (desc) {
+                if (desc == null || desc.isEmpty) {
+                  return 'Please enter a description';
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: 30,),
+            TextFormField(
+              decoration: const InputDecoration(
+                icon: Icon(Icons.attach_money_sharp),
+              ),
+              controller: amountController,
+              maxLines: 1,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly,],
+              validator: (goal) {
+                if (goal == null || goal.isEmpty) {
+                  return 'Please enter a ${amountTitle.toLowerCase()}';
+                }
+                return null;
+              },
+            )
+          ],
+        ),
+      ),
     );
   }
 }

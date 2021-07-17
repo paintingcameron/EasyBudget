@@ -9,8 +9,6 @@ import 'package:flutter/material.dart';
 enum button_options {
   edit_goal,
   allocated_budget,
-  mark_bought,
-  delete_project,
 }
 
 class ProjectPage extends StatefulWidget {
@@ -40,7 +38,7 @@ class _ProjectPageState extends State<ProjectPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 15, bottom: 15),
+              padding: const EdgeInsets.only(top: 30, bottom: 15),
               child: Text(
                 '${project.name}',
                 style: TextStyle(
@@ -74,7 +72,61 @@ class _ProjectPageState extends State<ProjectPage> {
                 ),
               ),
             ),
-            buttonsColumn(context),
+            Container(
+              height: 300,
+              child: buttonsColumn(context)
+            ),
+          ],
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Container(
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            FloatingActionButton(
+              heroTag: 'delete_project',
+              child: Icon(Icons.delete_forever),
+              backgroundColor: Colors.red,
+              onPressed: () async {
+                bool delete = await easyConfirmation(context, 'Delete ${project.name}?');
+                if (delete) {
+                  bloc.delete_project(project.key);
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+            (project.goal == project.allocated) ?
+            FloatingActionButton(
+              heroTag: 'bought_status',
+              child: (project.bought) ? Icon(Icons.remove_shopping_cart) : Icon(Icons.shopping_cart),
+              onPressed: () async {
+                var bought = await easyConfirmation(
+                  context,
+                  'Mark ${project.name} as ${(project.bought)?'not ':''}bought?',
+                );
+                if (bought) {
+                  setState(() {
+                    project.bought = !project.bought;
+                    bloc.mark_bought(project.key, project.bought);
+                  });
+                }
+              },
+            ) :
+            FloatingActionButton(
+              heroTag: 'greyed_bought_status',
+              backgroundColor: Colors.grey,
+              child: IconButton(
+                icon: Icon(Icons.shopping_cart),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text('Project goal not reached')));
+                },
+              ),
+              onPressed: null,
+            ),
           ],
         ),
       ),
@@ -89,10 +141,7 @@ class _ProjectPageState extends State<ProjectPage> {
         height: 60,
         child: ElevatedButton(
           child: Text(
-              (opt == button_options.edit_goal) ? 'Edit Goal' :
-              (opt == button_options.allocated_budget) ? 'Allocate Budget' :
-              (opt == button_options.mark_bought) ? ((project.bought) ? 'Mark Not Bought' : 'Mark Bought') :
-              'Delete Project',
+              (opt == button_options.edit_goal) ? 'Edit Goal' : 'Allocate Budget'
           ),
           onPressed: () async {
             switch (opt) {
@@ -132,25 +181,6 @@ class _ProjectPageState extends State<ProjectPage> {
                   });
                 }
                 break;
-              case button_options.mark_bought:
-                var bought = await easyConfirmation(
-                    context,
-                    'Mark ${project.name} as ${(project.bought)?'not ':null}bought?',
-                );
-                if (bought) {
-                  setState(() {
-                    project.bought = !project.bought;
-                    bloc.sinkProjects();
-                  });
-                }
-                break;
-              case button_options.delete_project:
-                bool delete = await easyConfirmation(context, 'Delete ${project.name}?');
-                if (delete) {
-                  bloc.delete_project(project.key);
-                  Navigator.of(context).pop();
-                }
-                break;
             }
           },
         ),
@@ -160,12 +190,10 @@ class _ProjectPageState extends State<ProjectPage> {
 
   Widget buttonsColumn(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         btnOption(button_options.edit_goal, context),
         btnOption(button_options.allocated_budget, context),
-        btnOption(button_options.mark_bought, context),
-        btnOption(button_options.delete_project, context),
       ],
     );
   }
