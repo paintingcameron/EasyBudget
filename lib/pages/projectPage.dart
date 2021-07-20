@@ -1,11 +1,13 @@
 
 import 'package:easybudget/exceptions/apiExceptions.dart';
 import 'package:easybudget/globals.dart';
+import 'package:easybudget/main.dart';
 import 'package:easybudget/models/project.dart';
 import 'package:easybudget/widgets/easyInputs.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 
 enum button_options {
   edit_goal,
@@ -39,29 +41,64 @@ class _ProjectPageState extends State<ProjectPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 30, bottom: 15),
+              padding: const EdgeInsets.only(top: 30, bottom: 20),
               child: Text(
                 '${project.name}',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
                   fontSize: (project.name.length >= 15) ? 40 : 50,
                 ),
               ),
             ),
-            Text(
-              'Allocated: $currency ${project.allocated}',
-              style: TextStyle(
-                fontSize: 40,
-              ),
+            Row (
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularPercentIndicator(
+                  radius: 260,
+                  lineWidth: 15,
+                  percent: project.allocated/project.goal,
+                  center: Text(
+                    'To Goal:\n$currency ${project.goal-project.allocated}',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 50,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  progressColor: Color(moneyGreen),
+                  circularStrokeCap: CircularStrokeCap.round,
+                  // progressColor: Color(0xFFFFDF00),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10.0),
+                        child:
+                          Text(
+                            'Goal: $currency ${project.goal}\n'
+                            'Allocated: $currency ${project.allocated}',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              height: 2,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                        ),
+                      ),
+                    ),
+                    // Container(
+                    //   padding: EdgeInsets.only(right:25),
+                    //   alignment: Alignment.centerRight,
+                    //   child: Text('${DateFormat('dd/mm/yyyy').format(project.date_created)}'),
+                    // ),
+                  ],
+                ),
+              ],
             ),
-            SizedBox(height: 15,),
-            Text(
-              'Goal: $currency ${project.goal}',
-              style: TextStyle(
-                fontSize: 40,
-              ),
-            ),
-            SizedBox(height: 20,),
             Container(
               width: 370,
               height: 100,
@@ -73,15 +110,7 @@ class _ProjectPageState extends State<ProjectPage> {
                 ),
               ),
             ),
-            Container(
-              padding: EdgeInsets.only(right:25),
-              alignment: Alignment.centerRight,
-              child: Text('${DateFormat('dd/mm/yyyy').format(project.date_created)}'),
-            ),
-            Container(
-              height: 300,
-              child: buttonsColumn(context)
-            ),
+            buttonsColumn(context),
           ],
         ),
       ),
