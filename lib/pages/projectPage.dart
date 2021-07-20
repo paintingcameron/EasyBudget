@@ -5,6 +5,7 @@ import 'package:easybudget/models/project.dart';
 import 'package:easybudget/widgets/easyInputs.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 enum button_options {
   edit_goal,
@@ -71,6 +72,11 @@ class _ProjectPageState extends State<ProjectPage> {
                   fontSize: 20,
                 ),
               ),
+            ),
+            Container(
+              padding: EdgeInsets.only(right:25),
+              alignment: Alignment.centerRight,
+              child: Text('${DateFormat('dd/mm/yyyy').format(project.date_created)}'),
             ),
             Container(
               height: 300,
@@ -190,7 +196,7 @@ class _ProjectPageState extends State<ProjectPage> {
 
   Widget buttonsColumn(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         btnOption(button_options.edit_goal, context),
         btnOption(button_options.allocated_budget, context),

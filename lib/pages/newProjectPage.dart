@@ -5,25 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
-class NewProjectPage extends StatefulWidget {
-  @override
-  _NewProjectPageState createState() => _NewProjectPageState('New Project');
-}
-
-class _NewProjectPageState extends State<NewProjectPage> {
+class NewProjectPage extends StatelessWidget {
   TextEditingController nameController = new TextEditingController();
   TextEditingController descController = new TextEditingController();
   TextEditingController amountController = new TextEditingController();
   GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
-
   String title;
 
-  _NewProjectPageState(this.title);
-  
-  @override
-  void initState() {
-    amountController = TextEditingController(text: 'Project Goal');
-  }
+  NewProjectPage(this.title);
 
   @override
   Widget build(BuildContext context) {
@@ -43,36 +32,40 @@ class _NewProjectPageState extends State<NewProjectPage> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: showFab?Container(
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 25.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            FloatingActionButton(
-              heroTag: 'btn_close',
-              onPressed: () {
-                Navigator.of(context).pop([false]);
-              },
-              child: Icon(Icons.close),
-              backgroundColor: Colors.red,
-            ),
-            FloatingActionButton(
-              heroTag: 'btn_save',
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  Navigator.of(context).pop([nameController.text, descController.text, amountController.text]);
-                } else {
+      floatingActionButton: showFab?floatingActionButtons(context):null,
+    );
+  }
+
+  Widget floatingActionButtons(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 25.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          FloatingActionButton(
+            heroTag: 'btn_close',
+            onPressed: () {
+              Navigator.of(context).pop([false]);
+            },
+            child: Icon(Icons.close),
+            backgroundColor: Colors.red,
+          ),
+          FloatingActionButton(
+            heroTag: 'btn_save',
+            onPressed: () {
+              if (_formKey.currentState!.validate()) {
+                Navigator.of(context).pop([nameController.text, descController.text, amountController.text]);
+              } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                  content: Text('Invalid Project')));
-                }
-              },
-              child: Icon(Icons.done),
-              backgroundColor: Colors.green,
-            ),
-          ],
-        ),
-      ):null,
+                    SnackBar(
+                        content: Text('Invalid Project')));
+              }
+            },
+            child: Icon(Icons.done),
+            backgroundColor: Colors.green,
+          ),
+        ],
+      ),
     );
   }
 
@@ -81,7 +74,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
       height: 220,
       alignment: Alignment.center,
       child: Text(
-        'New Project',
+        title,
         style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 60
@@ -132,6 +125,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
             TextFormField(
               decoration: const InputDecoration(
                 icon: Icon(Icons.attach_money_sharp),
+                labelText: 'Project Cost'
               ),
               controller: amountController,
               maxLines: 1,
@@ -146,6 +140,49 @@ class _NewProjectPageState extends State<NewProjectPage> {
             )
           ],
         ),
+      ),
+    );
+  }
+}
+
+class QuickNewProjectPage extends NewProjectPage {
+  double _available;
+  QuickNewProjectPage(String title, this._available) : super(title);
+
+  @override
+  Widget floatingActionButtons(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 25.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          FloatingActionButton(
+            heroTag: 'btn_close',
+            onPressed: () {
+              Navigator.of(context).pop([false]);
+            },
+            child: Icon(Icons.close),
+            backgroundColor: Colors.red,
+          ),
+          FloatingActionButton(
+            heroTag: 'btn_save',
+            onPressed: () {
+              if (!_formKey.currentState!.validate()) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text('Invalid Project')));
+              } else if (double.parse(amountController.text) > _available) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text('Insufficient available funds')));
+              } else {
+                Navigator.of(context).pop([nameController.text, descController.text, amountController.text]);
+              }
+            },
+            child: Icon(Icons.done),
+            backgroundColor: Colors.green,
+          ),
+        ],
       ),
     );
   }

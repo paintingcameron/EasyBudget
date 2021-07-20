@@ -76,10 +76,11 @@ class Bloc {
     unallocated_controller.sinkValue(budget - allocated);
   }
 
-  Future<void> new_project(String name, String desc, double goal) async {
-    await api.new_project(repo.project_box, repo.budget_box, name, desc, goal);
+  Future<Project> new_project(String name, String desc, double goal) async {
+    Project project = await api.new_project(repo.project_box, repo.budget_box, name, desc, goal);
 
     sinkRequired();
+    return project;
   }
 
   void delete_project(int id) async {

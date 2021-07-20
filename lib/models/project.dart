@@ -14,10 +14,13 @@ class Project extends HiveObject {
   late double _allocated;
   @HiveField(4)
   late bool _bought;
+  @HiveField(5)
+  late DateTime _date_created;
 
   Project(this._name, this._desc, this._goal, {allocated = 0.0, bought = false}) {
     _allocated = allocated;
     _bought = bought;
+    _date_created = DateTime.now();
   }
 
   void add_allocated(double amount) => _allocated += amount;
@@ -43,6 +46,8 @@ class Project extends HiveObject {
   String get desc => _desc;
 
   String get name => _name;
+
+  DateTime get date_created => _date_created;
 
   @override
   String toString() {
