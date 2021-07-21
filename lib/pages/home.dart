@@ -1,5 +1,6 @@
 import 'package:easybudget/bloc/bloc.dart';
 import 'package:easybudget/exceptions/apiExceptions.dart';
+import 'package:easybudget/main.dart';
 import 'package:easybudget/models/project.dart';
 import 'package:easybudget/pages/listPages.dart';
 import 'package:easybudget/pages/deniedPermissions.dart';
@@ -10,10 +11,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:easybudget/widgets/easyAppBars.dart';
 import 'package:easybudget/globals.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
+
 
 enum button_options {
   open_projects,
@@ -31,7 +35,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<dynamic> _bloc_permission;
-  late double available;
 
   Future<dynamic> _get_bloc_permission() async {
     if (await Permission.storage
@@ -78,62 +81,13 @@ class _HomePageState extends State<HomePage> {
       resizeToAvoidBottomInset: false,
       body: Center(
         child: Column( //Whole screen column
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            easy_stats(bloc),
-            SizedBox(height: 50,),
+            TopView(),
+            SizedBox(height: 20,),
             easyGridButtons(),
           ],
         ),
       ),
-    );
-  }
-
-  Widget easy_stats(Bloc bloc) {
-    return Column( //Top info column
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 30, bottom: 10),
-          child: Text('Total Budget', style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),),
-        ),
-        StreamBuilder(
-          stream: bloc.budget_stream,
-          builder: (context, budget_shot) =>
-              Text(
-                '$currency ${budget_shot.data}',
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),),
-        ),
-        SizedBox(
-          height: 20,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            easy_min_stat(bloc.required_stream, 'Required'),
-            easy_min_stat(bloc.unallocated_stream, 'Available'),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget easy_min_stat(Stream stream, String title) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text('$title:', style: TextStyle(fontSize: 30),),
-        StreamBuilder(
-          stream: stream,
-          builder: (context, snapshot) =>
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text('$currency ${snapshot.data}'),
-              ),
-        ),
-      ],
     );
   }
 
@@ -314,6 +268,111 @@ class _HomePageState extends State<HomePage> {
           (opt == button_options.new_project) ? 'New Project' : 'Quick Buy',
         )
       ],
+    );
+  }
+}
+
+class TopView extends StatefulWidget {
+  @override
+  _TopViewState createState() => _TopViewState();
+}
+
+class _TopViewState extends State<TopView> {
+  double budget = 0;
+  double available = 0;
+  double required = 0;
+
+  _TopViewState() {
+    bloc.budget_stream.listen((newBudget) {
+      setState(() {
+        budget = newBudget;
+      });
+    });
+
+    bloc.unallocated_stream.listen((newAvailable) {
+      setState(() {
+        available = newAvailable;
+      });
+    });
+
+    bloc.required_stream.listen((newRequired) {
+      setState(() {
+        required = newRequired;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      // mainAxisAlignment: MainAxisAlignment.center,
+      // crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(height: 20,),
+        available_chart(),
+        // SizedBox(height: 20,),
+        budgetRequired(),
+      ],
+    );
+  }
+
+  Widget budgetRequired() {
+    return Container(
+      width: MediaQuery.of(context).size.width - 40,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 10.0, right: 10, bottom: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: (budget <= required ) ? [
+                Text(
+                  'Budget: $currency $budget',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  'Required: $currency $required',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ] : [
+                Text(
+                  'Required: $currency $required',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  'Budget: $currency $budget',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+          LinearPercentIndicator(
+            lineHeight: 14,
+            percent: (budget <= required) ?
+              ((required != 0) ? budget/required : 0 ):
+              ((budget != 0) ? required/budget : 0),
+            progressColor: Colors.red,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget available_chart() {
+    return CircularPercentIndicator(
+      radius: 320,
+      lineWidth: 15,
+      percent: (budget == 0) ? 0 : available/budget,
+      center: Text(
+        'Available:\n$currency $available',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 45,
+        ),
+      ),
+      progressColor: Color(moneyGreen),
+      circularStrokeCap: CircularStrokeCap.round,
     );
   }
 }

@@ -5,21 +5,21 @@ import 'package:hive/hive.dart';
 import '../globals.dart' as globals;
 
 //-------------------------------------------Budget Tools-------------------------------------------
-/// Gets a list of all the edits to the budget from the Hive box [entry_box].
-List<Entry> get_budget_entries(Box<Entry> entry_box) {
-  var entries = entry_box.values.toList();
+/// Gets a list of all the edits to the budget from the Hive box [entryBox].
+List<Entry> getBudgetEntries(Box<Entry> entryBox) {
+  var entries = entryBox.values.toList();
 
   return entries;
 }
 
 /// Creates a new edit to the budget
 ///
-/// The new [amount] with its description, [desc], is saved into the [entry_box] and the updated
-/// budget is saved to [budget_box].
-Future<Entry> new_entry(Box<Entry> entry_box, Box<double> budget_box,
+/// The new [amount] with its description, [desc], is saved into the [entryBox] and the updated
+/// budget is saved to [budgetBox].
+Future<Entry> newEntry(Box<Entry> entryBox, Box<double> budgetBox,
     double amount, String desc) async {
 
-  var budget = budget_box.get(globals.budget_key);
+  var budget = budgetBox.get(globals.budget_key);
   budget ??= 0;
 
   if (budget + amount < 0) {
@@ -28,16 +28,16 @@ Future<Entry> new_entry(Box<Entry> entry_box, Box<double> budget_box,
 
   var entry = Entry.newEntry(amount, desc);
 
-  await entry_box.add(entry);
+  await entryBox.add(entry);
 
-  await budget_box.put(globals.budget_key, (budget + amount));
+  await budgetBox.put(globals.budget_key, (budget + amount));
 
   return entry;
 }
 
 //------------------------------------------Project Tools-------------------------------------------
 /// Gets those [projects] that are either open or closed depending on the [open] option
-List<Project> get_open_closed_projects(List<Project> projects, bool open) {
+List<Project> getOpenClosedProjected(List<Project> projects, bool open) {
   var filtered = <Project>[];
 
   for (var project in projects) {
@@ -51,16 +51,16 @@ List<Project> get_open_closed_projects(List<Project> projects, bool open) {
 
 /// Creates a new project with the given [name], [desc] and [goal]. Adds it to a Hive box and
 /// updates the budget box accordingly
-Future<Project> new_project(Box<Project> project_box, Box<double> budget_box,
+Future<Project> newProject(Box<Project> projectBox, Box<double> budgetBox,
     String name, String desc, double goal) async {
 
   var project = Project(name, desc, goal);
-  await project_box.add(project);
+  await projectBox.add(project);
 
-  var required = budget_box.get(globals.required_key);
+  var required = budgetBox.get(globals.required_key);
   required ??= 0;
   required += goal;
-  await budget_box.put(globals.required_key, required);
+  await budgetBox.put(globals.required_key, required);
 
   return project;
 }
@@ -69,31 +69,31 @@ Future<Project> new_project(Box<Project> project_box, Box<double> budget_box,
 ///
 /// Throws [keyDoesNotExistException] if the given [id] does not exist in the Hive projects box.
 /// Otherwise the operation succeeds silently.
-Future<void> delete_project(Box<Project> project_box, Box<double> budget_box, int id) async {
-  if (!project_box.containsKey(id)) {
+Future<void> deleteProject(Box<Project> projectBox, Box<double> budgetBox, int id) async {
+  if (!projectBox.containsKey(id)) {
     throw keyDoesNotExistException('The given key: $id does not exist in the projects hive');
   }
 
-  var project = project_box.get(id);
+  var project = projectBox.get(id);
 
-  var required = budget_box.get(globals.required_key);
-  var allocated = budget_box.get(globals.allocated_key);
+  var required = budgetBox.get(globals.required_key);
+  var allocated = budgetBox.get(globals.allocated_key);
   required ??= 0;
   allocated ??= 0;
 
   required -= project!.goal;
   allocated -= project.allocated;
 
-  await budget_box.put(globals.required_key, required);
-  await budget_box.put(globals.allocated_key, allocated);
+  await budgetBox.put(globals.required_key, required);
+  await budgetBox.put(globals.allocated_key, allocated);
 
-  await project_box.delete(id);
+  await projectBox.delete(id);
   print('Project: ${project.name} deleted');
 }
 
 /// Deletes all projects from the Hive box
-void delete_all_projects(Box<Project> project_box) async {
-  await project_box.deleteAll(project_box.keys);
+void deleteAllProjects(Box<Project> projectBox) async {
+  await projectBox.deleteAll(projectBox.keys);
 }
 
 /// Adds an [amount] to the allocated budget for a specific [project].
@@ -102,17 +102,17 @@ void delete_all_projects(Box<Project> project_box) async {
 /// is greater than the goal for the [project] then [allocatedGreaterThanGoalException] is thrown.
 /// If [amount] is greater than the amount of available budget unallocated [lackOfAvailableBudget]
 /// is thrown.
-void add_to_allocated(Box<Project> project_box, Box<double> budget_box, int id, double amount) {
+void addToAllocated(Box<Project> projectBox, Box<double> budgetBox, int id, double amount) {
 
-  var project = project_box.get(id);
+  var project = projectBox.get(id);
 
   if (amount > project!.goal) {
     throw allocatedGreaterThanGoalException('Cannot allocate R$amount to a project with goal: '
         'R${project.goal}');
   }
 
-  var budget = budget_box.get(globals.budget_key);
-  var allocated = budget_box.get(globals.allocated_key);
+  var budget = budgetBox.get(globals.budget_key);
+  var allocated = budgetBox.get(globals.allocated_key);
 
   budget ??= 0;
   allocated ??= 0;
@@ -127,31 +127,31 @@ void add_to_allocated(Box<Project> project_box, Box<double> budget_box, int id, 
   }
 
   allocated += amount;
-  budget_box.put(globals.allocated_key, allocated);
+  budgetBox.put(globals.allocated_key, allocated);
 
   project.add_allocated(amount);
   project.save();
 }
 
-/// Assigns the goal project with the given [name] to [new_goal] and saves the affects to the
-void edit_goal(Box<Project> project_box, Box<double> budget_box, int id, double new_goal) {
-  var project = project_box.get(id);
+/// Assigns the goal project with the given [name] to [newGoal] and saves the affects to the
+void editGoal(Box<Project> projectBox, Box<double> budgetBox, int id, double newGoal) {
+  var project = projectBox.get(id);
 
-  var required = budget_box.get(globals.required_key);
+  var required = budgetBox.get(globals.required_key);
   required ??= 0;
-  required = (required - project!.goal) + new_goal;
-  budget_box.put(globals.required_key, required);
+  required = (required - project!.goal) + newGoal;
+  budgetBox.put(globals.required_key, required);
 
-  project.goal = new_goal;
+  project.goal = newGoal;
   project.save();
 }
 
-void mark_bought(Box<Project> project_box, Box<double> budget_box, int id, bool bought) {
-  var project = project_box.get(id);
+void markBought(Box<Project> projectBox, Box<double> budgetBox, int id, bool bought) {
+  var project = projectBox.get(id);
 
-  var budget = budget_box.get(globals.budget_key);
-  var required = budget_box.get(globals.required_key);
-  var allocated = budget_box.get(globals.allocated_key);
+  var budget = budgetBox.get(globals.budget_key);
+  var required = budgetBox.get(globals.required_key);
+  var allocated = budgetBox.get(globals.allocated_key);
 
   budget ??= 0;
   required ??= 0;
@@ -167,9 +167,9 @@ void mark_bought(Box<Project> project_box, Box<double> budget_box, int id, bool 
     allocated += project.goal;
   }
 
-  budget_box.put(globals.budget_key, budget);
-  budget_box.put(globals.required_key, required);
-  budget_box.put(globals.allocated_key, allocated);
+  budgetBox.put(globals.budget_key, budget);
+  budgetBox.put(globals.required_key, required);
+  budgetBox.put(globals.allocated_key, allocated);
 
   project.bought = bought;
   project.save();

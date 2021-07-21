@@ -46,5 +46,4 @@ flutter:
   uses-material-design: true
 
   assets:
-    - easy_budget_launcher_icon.png
-    - deposit_icon.png
+    - assets/images/

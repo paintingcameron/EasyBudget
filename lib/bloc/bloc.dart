@@ -48,7 +48,7 @@ class Bloc {
   Stream<double> get unallocated_stream => unallocated_controller.stream;
 
   void sinkProjects() {
-    projects.setList(api.get_open_closed_projects(repo.project_box.values.toList(), open_projects));
+    projects.setList(api.getOpenClosedProjected(repo.project_box.values.toList(), open_projects));
   }
 
   void sinkAllEntries() {
@@ -77,14 +77,14 @@ class Bloc {
   }
 
   Future<Project> new_project(String name, String desc, double goal) async {
-    Project project = await api.new_project(repo.project_box, repo.budget_box, name, desc, goal);
+    Project project = await api.newProject(repo.project_box, repo.budget_box, name, desc, goal);
 
     sinkRequired();
     return project;
   }
 
   void delete_project(int id) async {
-    await api.delete_project(repo.project_box, repo.budget_box, id);
+    await api.deleteProject(repo.project_box, repo.budget_box, id);
 
     sinkRequired();
     sinkUnallocated();
@@ -92,21 +92,21 @@ class Bloc {
   }
 
   void add_to_allocated(int id, double amount) {
-    api.add_to_allocated(repo.project_box, repo.budget_box, id, amount);
+    api.addToAllocated(repo.project_box, repo.budget_box, id, amount);
 
     sinkUnallocated();
     sinkProjects();
   }
 
   void edit_goal(int id, double newGoal) {
-    api.edit_goal(repo.project_box, repo.budget_box, id, newGoal);
+    api.editGoal(repo.project_box, repo.budget_box, id, newGoal);
 
     sinkRequired();
     sinkProjects();
   }
 
   void mark_bought(int id, bool bought) {
-    api.mark_bought(repo.project_box, repo.budget_box, id, bought);
+    api.markBought(repo.project_box, repo.budget_box, id, bought);
 
     sinkBudget();
     sinkRequired();
@@ -116,7 +116,7 @@ class Bloc {
   }
 
   Future<void> new_entry(double amount, String desc) async {
-    await api.new_entry(repo.entry_box, repo.budget_box, amount, desc);
+    await api.newEntry(repo.entry_box, repo.budget_box, amount, desc);
 
     sinkBudget();
     sinkUnallocated();

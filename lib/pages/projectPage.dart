@@ -6,7 +6,6 @@ import 'package:easybudget/models/project.dart';
 import 'package:easybudget/widgets/easyInputs.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 enum button_options {
@@ -43,7 +42,7 @@ class _ProjectPageState extends State<ProjectPage> {
             Padding(
               padding: const EdgeInsets.only(top: 30, bottom: 20),
               child: Text(
-                '${project.name}',
+                '${project.name}'.toUpperCase(),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   decoration: TextDecoration.underline,
@@ -178,7 +177,7 @@ class _ProjectPageState extends State<ProjectPage> {
           child: Text(
               (opt == button_options.edit_goal) ? 'Edit Goal' : 'Allocate Budget'
           ),
-          onPressed: () async {
+          onPressed: (project.bought)? null : () async {
             switch (opt) {
               case button_options.edit_goal:
                 var newGoal = await showDialog(
