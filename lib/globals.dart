@@ -6,6 +6,7 @@ String project_box = 'project_box';
 String budget_key = 'budget';
 String required_key = 'required';
 String allocated_key = 'allocated';
+String subscriptionKey = 'subscription';
 
 String currency = 'R';
 

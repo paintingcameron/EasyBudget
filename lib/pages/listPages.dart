@@ -54,7 +54,7 @@ class ProjectListPage extends StatelessWidget {
     return Scaffold(
       appBar: easyAppBar_title('${(open) ? 'Open' : 'Closed '} Projects'),
       body: StreamBuilder<List<Project>>(
-        stream: bloc.projects_stream,
+        stream: bloc.projectStream,
         builder: (context, AsyncSnapshot<List<Project>> snapshot) {
           if (snapshot.hasData) {
             return getListView(snapshot.data!, context);
@@ -101,7 +101,7 @@ class EntryListPage extends StatelessWidget {
       child: Scaffold(
         appBar: easyAppBar_title('Deposits / Withdraws'),
         body: StreamBuilder<List<Entry>>(
-          stream: bloc.entries_stream,
+          stream: bloc.entryStream,
           builder: (context, AsyncSnapshot<List<Entry>> snapshot) {
             if (snapshot.hasData) {
               return getListView(snapshot.data!);

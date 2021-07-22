@@ -1,24 +1,18 @@
 import 'dart:async';
 
 import 'package:easybudget/api/tools.dart' as api;
+import 'package:easybudget/exceptions/apiExceptions.dart';
 import 'package:easybudget/models/entry.dart';
 import 'package:easybudget/models/project.dart';
+import 'package:easybudget/models/subscription.dart';
 import 'package:easybudget/repo/repository.dart';
 import 'package:easybudget/globals.dart' as globals;
 
 class Bloc {
   late Repository repo;
-  late final StreamList<Project> projects;
-  late final StreamList<Entry> entries;
-  late final Money_Controller budgetController;
-  late final Money_Controller requiredController;
-  late final Money_Controller availableController;
   late bool openProjects;
 
   Bloc(var path) {
-    projects = StreamList<Project>();
-    entries = StreamList<Entry>();
-
     openProjects = true;
 
     repo = Repository();
@@ -26,63 +20,58 @@ class Bloc {
 
   Future<void> init_repo() async {
     await repo.init_boxes();
-
-    var budget = repo.budget_box.get(globals.budget_key);
-    var required = repo.budget_box.get(globals.required_key);
-    var allocated = repo.budget_box.get(globals.allocated_key);
-    budget ??= 0;
-    required ??= 0;
-    allocated ??= 0;
-
-    budgetController = Money_Controller(budget);
-    requiredController = Money_Controller(required);
-    availableController = Money_Controller(budget - allocated);
+    await repo.initStream();
   }
 
-  Stream<List<Project>> get projects_stream => projects.stream;
-  Stream<List<Entry>> get entries_stream => entries.stream;
-  Stream<double> get budget_stream => budgetController.stream;
-  Stream<double> get required_stream => requiredController.stream;
-  Stream<double> get unallocated_stream => availableController.stream;
+  Stream<List<Project>> get projectStream => repo.projectList.stream;
+  Stream<List<Entry>> get entryStream => repo.entriesList.stream;
+  Stream<List<Subscription>> get subscriptionStream => repo.subsList.stream;
+  Stream<double> get budgetStream => repo.budgetController.stream;
+  Stream<double> get requiredStream => repo.requiredController.stream;
+  Stream<double> get availableStream => repo.availableController.stream;
 
   void sinkProjects() {
-    projects.setList(api.getOpenClosedProjected(repo.project_box.values.toList(), openProjects));
+    repo.projectList.setList(api.getOpenClosedProjected(repo.projectBox.values.toList(), openProjects));
   }
 
   void sinkAllEntries() {
-    entries.setList(repo.entry_box.values.toList());
+    repo.entriesList.setList(repo.entryBox.values.toList());
   }
 
   void sinkBudget() {
-    var budget = repo.budget_box.get(globals.budget_key);
+    var budget = repo.budgetBox.get(globals.budget_key);
     budget ??= 0;
-    budgetController.sinkValue(budget);
+    repo.budgetController.sinkValue(budget);
   }
 
   void sinkRequired() {
-    var required = repo.budget_box.get(globals.required_key);
+    var required = repo.budgetBox.get(globals.required_key);
     required ??= 0;
-    requiredController.sinkValue(required);
+    repo.requiredController.sinkValue(required);
   }
 
   void sinkUnallocated() {
-    var budget = repo.budget_box.get(globals.budget_key);
-    var allocated = repo.budget_box.get(globals.allocated_key);
+    var budget = repo.budgetBox.get(globals.budget_key);
+    var allocated = repo.budgetBox.get(globals.allocated_key);
     budget ??= 0;
     allocated ??= 0;
 
-    availableController.sinkValue(budget - allocated);
+    repo.availableController.sinkValue(budget - allocated);
+  }
+
+  void sinkAllSubscriptions() {
+    repo.subsList.setList(repo.subsBox.values.toList());
   }
 
   Future<Project> new_project(String name, String desc, double goal) async {
-    Project project = await api.newProject(repo.project_box, repo.budget_box, name, desc, goal);
+    Project project = await api.newProject(repo.projectBox, repo.budgetBox, name, desc, goal);
 
     sinkRequired();
     return project;
   }
 
   void delete_project(int id) async {
-    await api.deleteProject(repo.project_box, repo.budget_box, id);
+    await api.deleteProject(repo.projectBox, repo.budgetBox, id);
 
     sinkRequired();
     sinkUnallocated();
@@ -90,21 +79,21 @@ class Bloc {
   }
 
   void add_to_allocated(int id, double amount) {
-    api.addToAllocated(repo.project_box, repo.budget_box, id, amount);
+    api.addToAllocated(repo.projectBox, repo.budgetBox, id, amount);
 
     sinkUnallocated();
     sinkProjects();
   }
 
   void edit_goal(int id, double newGoal) {
-    api.editGoal(repo.project_box, repo.budget_box, id, newGoal);
+    api.editGoal(repo.projectBox, repo.budgetBox, id, newGoal);
 
     sinkRequired();
     sinkProjects();
   }
 
   void mark_bought(int id, bool bought) {
-    api.markBought(repo.project_box, repo.budget_box, id, bought);
+    api.markBought(repo.projectBox, repo.budgetBox, id, bought);
 
     sinkBudget();
     sinkRequired();
@@ -114,63 +103,43 @@ class Bloc {
   }
 
   Future<void> new_entry(double amount, String desc) async {
-    await api.newEntry(repo.entry_box, repo.budget_box, amount, desc);
+    await api.newEntry(repo.entryBox, repo.budgetBox, amount, desc);
 
     sinkBudget();
     sinkUnallocated();
   }
 
+  Future<void> newSubscription(String name, String desc, double amount, PeriodTypes type,
+      int period, DateTime startDate) async {
+    await api.newSubscription(repo.subsBox, name, desc, amount, type, period, startDate);
+
+    //TODO: Figure out which types of subscriptions are sunk when there is a new subscription
+  }
+
+  Future<dynamic> makeSubscriptionPayments() async {
+
+    var out;
+
+    try {
+      api.paySubscriptions(repo.subsBox, repo.entryBox, repo.budgetBox);
+      out = true;
+    } on stoppedSubscriptionsException catch (e) {
+      out = e.subsList;
+    }
+
+    sinkBudget();
+    sinkUnallocated();
+
+    return out;
+  }
+
+  void pauseSubscription(int id) => api.pauseSubscription(repo.subsBox, id);
+
   void dispose()  {
-    projects.dispose();
-    entries.dispose();
-    budgetController.dispose();
-    requiredController.dispose();
-    availableController.dispose();
-  }
-}
-
-class StreamList<T> {
-  final StreamController <List<T>> _controller = StreamController.broadcast();
-
-  Stream<List<T>> get stream => _controller.stream;
-
-  List<T> _list = [];
-
-  void setList(List<T> list) {
-    _list = list;
-    sinkList();
-  }
-
-  void addToList(T value) {
-    _list.add(value);
-    sinkList();
-  }
-
-  void sinkList() {
-    _controller.sink.add(_list);
-  }
-
-  void dispose() {
-    _controller.close();
-  }
-}
-
-class Money_Controller {
-  final StreamController<double> _controller = StreamController();
-  late double value;
-
-  Money_Controller(double value) {
-    this.value = value;
-    sinkValue(value);
-  }
-
-  Stream<double> get stream => _controller.stream;
-
-  void sinkValue(double value) {
-    _controller.sink.add(value);
-  }
-
-  void dispose() {
-    _controller.close();
+    repo.projectList.dispose();
+    repo.entriesList.dispose();
+    repo.budgetController.dispose();
+    repo.requiredController.dispose();
+    repo.availableController.dispose();
   }
 }

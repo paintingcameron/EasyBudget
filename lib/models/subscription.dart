@@ -1,5 +1,7 @@
 import 'package:hive/hive.dart';
 
+part 'subscription.g.dart';
+
 enum PeriodTypes {
   Daily,
   Weekly,
@@ -26,13 +28,16 @@ class Subscription extends HiveObject {
   @HiveField(7)
   late bool _paused;
 
-  Subscription(String name, String desc, double amount, int period, PeriodTypes type) {
+  Subscription(this._name, this._desc, this._amount, this._period, this._type,
+      this._startDate, this._lastPaid, this._paused);
+
+  Subscription.newSub(String name, String desc, double amount, DateTime startDate,
+      int period, PeriodTypes type) {
     _name = name;
     _desc = desc;
     _amount = amount;
     _type = type;
-
-    _startDate = DateTime.now();
+    _startDate = startDate;
 
     _paused = true;
 
@@ -52,9 +57,12 @@ class Subscription extends HiveObject {
   String get name => _name;
   String get desc => _desc;
   double get amount => _amount;
+  DateTime get startDate => _startDate;
+  bool get paused => _paused;
 
   set pause(bool pause) {
     this._paused = pause;
+    this.save();
   }
 
   bool paymentDue(DateTime now) {

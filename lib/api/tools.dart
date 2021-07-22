@@ -1,10 +1,14 @@
 import 'package:easybudget/exceptions/apiExceptions.dart';
 import 'package:easybudget/models/entry.dart';
 import 'package:easybudget/models/project.dart';
+import 'package:easybudget/models/subscription.dart';
+import 'package:flutter/rendering.dart';
 import 'package:hive/hive.dart';
 import '../globals.dart' as globals;
 
-//-------------------------------------------Budget Tools-------------------------------------------
+//--------------------------------------------------------------------------------------------------
+//                                        Entry Tools
+//--------------------------------------------------------------------------------------------------
 /// Gets a list of all the edits to the budget from the Hive box [entryBox].
 List<Entry> getBudgetEntries(Box<Entry> entryBox) {
   var entries = entryBox.values.toList();
@@ -35,7 +39,9 @@ Future<Entry> newEntry(Box<Entry> entryBox, Box<double> budgetBox,
   return entry;
 }
 
-//------------------------------------------Project Tools-------------------------------------------
+//--------------------------------------------------------------------------------------------------
+//                                       Project Tools
+//--------------------------------------------------------------------------------------------------
 /// Gets those [projects] that are either open or closed depending on the [open] option
 List<Project> getOpenClosedProjected(List<Project> projects, bool open) {
   var filtered = <Project>[];
@@ -146,6 +152,10 @@ void editGoal(Box<Project> projectBox, Box<double> budgetBox, int id, double new
   project.save();
 }
 
+/// Marks the project with Hive key: [id] as [bought]
+///
+/// A project that is bought will deduct from the budget, required and allocated the goal of the
+/// project while a project that is marked as not bought will add to those fields.
 void markBought(Box<Project> projectBox, Box<double> budgetBox, int id, bool bought) {
   var project = projectBox.get(id);
 
@@ -173,4 +183,74 @@ void markBought(Box<Project> projectBox, Box<double> budgetBox, int id, bool bou
 
   project.bought = bought;
   project.save();
+}
+
+//--------------------------------------------------------------------------------------------------
+//                                       Subscription Tools
+//--------------------------------------------------------------------------------------------------
+
+Future<Subscription> newSubscription(Box<Subscription> subsBox, String name,
+    String desc, double amount, PeriodTypes type, int period, DateTime startDate) async {
+
+  Subscription sub = Subscription.newSub(name, desc, amount, startDate, period, type);
+
+  await subsBox.add(sub);
+
+  return sub;
+}
+
+List<Subscription> getPausedSubscriptions(Box<Subscription> subsBox, bool paused) {
+  List<Subscription> subs = [];
+
+  for (var sub in subsBox.values) {
+    if (sub.paused == paused) {
+      subs.add(sub);
+    }
+  }
+
+  return subs;
+}
+
+/// Makes all possible payments for the running subscriptions in [subsbox]
+///
+/// Throws [stoppedSubscriptionsException] with subscriptions that couldn't be paid if there is
+/// insufficient funds to complete all subscription payments.
+/// TODO: Order the list such that subscribed income is before payments
+void paySubscriptions(Box<Subscription> subsBox, Box<Entry> entryBox, Box<double> budgetBox) {
+  DateTime now = DateTime.now();
+
+  for (int i = 0; i < subsBox.length; i++) {
+    Subscription sub = subsBox.values.elementAt(i);
+    try {
+      if (sub.paymentDue(now)) {
+        newEntry(entryBox, budgetBox, sub.amount, 'Subscription: ${sub.name}');
+        sub.makePayment();
+      }
+    } on lackOfAvailableBudget {
+      List<Subscription> unpaid = subsBox.values.skip(i).toList();
+      for (var sub in unpaid) {
+        sub.pause = true;
+      }
+      throw stoppedSubscriptionsException('Insufficient funds to pay all subscriptions', unpaid);
+    }
+  }
+}
+
+/// Removes a subscription with the Hive key [id]
+///
+/// Throws a [keyDoesNotExistException] if the [id] does not exist in [subsBox]
+void removeSubscription(Box<Subscription> subsBox, int id) async {
+  if (!subsBox.containsKey(id)) {
+    throw keyDoesNotExistException('Subscription id: $id does not exist');
+  }
+
+  await subsBox.delete(id);
+}
+
+void pauseSubscription(Box<Subscription> subsBox, int id) {
+  var sub = subsBox.get(id);
+
+  sub!.pause = !sub.paused;
+
+  sub.save();
 }

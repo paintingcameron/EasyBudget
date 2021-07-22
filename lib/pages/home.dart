@@ -37,9 +37,7 @@ class _HomePageState extends State<HomePage> {
   late Future<dynamic> _bloc_permission;
 
   Future<dynamic> _get_bloc_permission() async {
-    if (await Permission.storage
-        .request()
-        .isGranted) {
+    if (await Permission.storage.request().isGranted) {
       var dir = await getApplicationDocumentsDirectory();
       Hive.init(dir.path);
       bloc = Bloc(await getApplicationDocumentsDirectory());
@@ -226,8 +224,8 @@ class _HomePageState extends State<HomePage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      var budget = bloc.repo.budget_box.get(budget_key);
-                      var allocated = bloc.repo.budget_box.get(allocated_key);
+                      var budget = bloc.repo.budgetBox.get(budget_key);
+                      var allocated = bloc.repo.budgetBox.get(allocated_key);
                       budget ??= 0;
                       allocated ??= 0;
                       double available = budget - allocated;
@@ -283,19 +281,19 @@ class _TopViewState extends State<TopView> {
   double required = 0;
 
   _TopViewState() {
-    bloc.budget_stream.listen((newBudget) {
+    bloc.budgetStream.listen((newBudget) {
       setState(() {
         budget = newBudget;
       });
     });
 
-    bloc.unallocated_stream.listen((newAvailable) {
+    bloc.availableStream.listen((newAvailable) {
       setState(() {
         available = newAvailable;
       });
     });
 
-    bloc.required_stream.listen((newRequired) {
+    bloc.requiredStream.listen((newRequired) {
       setState(() {
         required = newRequired;
       });
