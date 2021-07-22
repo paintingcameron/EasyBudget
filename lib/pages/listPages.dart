@@ -99,7 +99,7 @@ class EntryListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       child: Scaffold(
-        appBar: easyAppBar_title('Deposits'),
+        appBar: easyAppBar_title('Deposits / Withdraws'),
         body: StreamBuilder<List<Entry>>(
           stream: bloc.entries_stream,
           builder: (context, AsyncSnapshot<List<Entry>> snapshot) {

@@ -6,22 +6,20 @@ import 'package:easybudget/models/project.dart';
 import 'package:easybudget/repo/repository.dart';
 import 'package:easybudget/globals.dart' as globals;
 
-Bloc g_bloc = Bloc('/Hive');
-
 class Bloc {
   late Repository repo;
   late final StreamList<Project> projects;
   late final StreamList<Entry> entries;
-  late final Money_Controller budget_controller;
-  late final Money_Controller required_controller;
-  late final Money_Controller unallocated_controller;
-  late bool open_projects;
+  late final Money_Controller budgetController;
+  late final Money_Controller requiredController;
+  late final Money_Controller availableController;
+  late bool openProjects;
 
   Bloc(var path) {
     projects = StreamList<Project>();
     entries = StreamList<Entry>();
 
-    open_projects = true;
+    openProjects = true;
 
     repo = Repository();
   }
@@ -36,19 +34,19 @@ class Bloc {
     required ??= 0;
     allocated ??= 0;
 
-    budget_controller = Money_Controller(budget);
-    required_controller = Money_Controller(required);
-    unallocated_controller = Money_Controller(budget - allocated);
+    budgetController = Money_Controller(budget);
+    requiredController = Money_Controller(required);
+    availableController = Money_Controller(budget - allocated);
   }
 
   Stream<List<Project>> get projects_stream => projects.stream;
   Stream<List<Entry>> get entries_stream => entries.stream;
-  Stream<double> get budget_stream => budget_controller.stream;
-  Stream<double> get required_stream => required_controller.stream;
-  Stream<double> get unallocated_stream => unallocated_controller.stream;
+  Stream<double> get budget_stream => budgetController.stream;
+  Stream<double> get required_stream => requiredController.stream;
+  Stream<double> get unallocated_stream => availableController.stream;
 
   void sinkProjects() {
-    projects.setList(api.getOpenClosedProjected(repo.project_box.values.toList(), open_projects));
+    projects.setList(api.getOpenClosedProjected(repo.project_box.values.toList(), openProjects));
   }
 
   void sinkAllEntries() {
@@ -58,13 +56,13 @@ class Bloc {
   void sinkBudget() {
     var budget = repo.budget_box.get(globals.budget_key);
     budget ??= 0;
-    budget_controller.sinkValue(budget);
+    budgetController.sinkValue(budget);
   }
 
   void sinkRequired() {
     var required = repo.budget_box.get(globals.required_key);
     required ??= 0;
-    required_controller.sinkValue(required);
+    requiredController.sinkValue(required);
   }
 
   void sinkUnallocated() {
@@ -73,7 +71,7 @@ class Bloc {
     budget ??= 0;
     allocated ??= 0;
 
-    unallocated_controller.sinkValue(budget - allocated);
+    availableController.sinkValue(budget - allocated);
   }
 
   Future<Project> new_project(String name, String desc, double goal) async {
@@ -125,9 +123,9 @@ class Bloc {
   void dispose()  {
     projects.dispose();
     entries.dispose();
-    budget_controller.dispose();
-    required_controller.dispose();
-    unallocated_controller.dispose();
+    budgetController.dispose();
+    requiredController.dispose();
+    availableController.dispose();
   }
 }
 

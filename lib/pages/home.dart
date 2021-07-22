@@ -147,7 +147,7 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               SizedBox(height: 5,),
-              Text('Deposit'),
+              Text('Deposit/Withdraw'),
             ],
           ),
           gridButton(button_options.closed_projects),
@@ -170,7 +170,7 @@ class _HomePageState extends State<HomePage> {
           onPressed: () async {
             switch (opt) {
               case button_options.open_projects:
-                bloc.open_projects = true;
+                bloc.openProjects = true;
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -179,7 +179,7 @@ class _HomePageState extends State<HomePage> {
                 );
                 break;
               case button_options.closed_projects:
-                bloc.open_projects = false;
+                bloc.openProjects = false;
                 Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -263,7 +263,7 @@ class _HomePageState extends State<HomePage> {
         Text(
           (opt == button_options.open_projects) ? 'Open Projects' :
           (opt == button_options.closed_projects) ? 'Closed Projects' :
-          (opt == button_options.budget_entries) ? 'Deposits' :
+          (opt == button_options.budget_entries) ? 'Deposits/Withdraws' :
           (opt == button_options.new_entry) ? 'New Entry' :
           (opt == button_options.new_project) ? 'New Project' : 'Quick Buy',
         )
@@ -351,7 +351,7 @@ class _TopViewState extends State<TopView> {
             percent: (budget <= required) ?
               ((required != 0) ? budget/required : 0 ):
               ((budget != 0) ? required/budget : 0),
-            progressColor: Colors.red,
+            progressColor: Color(moneyGreen),
           ),
         ],
       ),
@@ -361,7 +361,7 @@ class _TopViewState extends State<TopView> {
   Widget available_chart() {
     return CircularPercentIndicator(
       radius: 320,
-      lineWidth: 15,
+      lineWidth: 20,
       percent: (budget == 0) ? 0 : available/budget,
       center: Text(
         'Available:\n$currency $available',
