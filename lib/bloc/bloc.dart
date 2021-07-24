@@ -18,8 +18,8 @@ class Bloc {
     repo = Repository();
   }
 
-  Future<void> init_repo() async {
-    await repo.init_boxes();
+  Future<void> initRepo() async {
+    await repo.initBoxes();
     await repo.initStream();
   }
 
@@ -63,14 +63,14 @@ class Bloc {
     repo.subsList.setList(repo.subsBox.values.toList());
   }
 
-  Future<Project> new_project(String name, String desc, double goal) async {
+  Future<Project> newProject(String name, String desc, double goal) async {
     Project project = await api.newProject(repo.projectBox, repo.budgetBox, name, desc, goal);
 
     sinkRequired();
     return project;
   }
 
-  void delete_project(int id) async {
+  void deleteProject(int id) async {
     await api.deleteProject(repo.projectBox, repo.budgetBox, id);
 
     sinkRequired();
@@ -78,21 +78,21 @@ class Bloc {
     sinkProjects();
   }
 
-  void add_to_allocated(int id, double amount) {
+  void addToAllocated(int id, double amount) {
     api.addToAllocated(repo.projectBox, repo.budgetBox, id, amount);
 
     sinkUnallocated();
     sinkProjects();
   }
 
-  void edit_goal(int id, double newGoal) {
+  void editGoal(int id, double newGoal) {
     api.editGoal(repo.projectBox, repo.budgetBox, id, newGoal);
 
     sinkRequired();
     sinkProjects();
   }
 
-  void mark_bought(int id, bool bought) {
+  void markBought(int id, bool bought) {
     api.markBought(repo.projectBox, repo.budgetBox, id, bought);
 
     sinkBudget();
@@ -102,7 +102,7 @@ class Bloc {
     sinkProjects();
   }
 
-  Future<void> new_entry(double amount, String desc) async {
+  Future<void> newEntry(double amount, String desc) async {
     await api.newEntry(repo.entryBox, repo.budgetBox, amount, desc);
 
     sinkBudget();
@@ -123,7 +123,7 @@ class Bloc {
     try {
       api.paySubscriptions(repo.subsBox, repo.entryBox, repo.budgetBox);
       out = true;
-    } on stoppedSubscriptionsException catch (e) {
+    } on StoppedSubscriptionsException catch (e) {
       out = e.subsList;
     }
 

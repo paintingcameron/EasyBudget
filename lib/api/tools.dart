@@ -2,7 +2,6 @@ import 'package:easybudget/exceptions/apiExceptions.dart';
 import 'package:easybudget/models/entry.dart';
 import 'package:easybudget/models/project.dart';
 import 'package:easybudget/models/subscription.dart';
-import 'package:flutter/rendering.dart';
 import 'package:hive/hive.dart';
 import '../globals.dart' as globals;
 
@@ -27,7 +26,7 @@ Future<Entry> newEntry(Box<Entry> entryBox, Box<double> budgetBox,
   budget ??= 0;
 
   if (budget + amount < 0) {
-    throw new negativeBudgetException('Budget cannot be negative');
+    throw new NegativeBudgetException('Budget cannot be negative');
   }
 
   var entry = Entry.newEntry(amount, desc);
@@ -73,11 +72,11 @@ Future<Project> newProject(Box<Project> projectBox, Box<double> budgetBox,
 
 /// Attempts to delete a project from a Hive box
 ///
-/// Throws [keyDoesNotExistException] if the given [id] does not exist in the Hive projects box.
+/// Throws [KeyDoesNotExistException] if the given [id] does not exist in the Hive projects box.
 /// Otherwise the operation succeeds silently.
 Future<void> deleteProject(Box<Project> projectBox, Box<double> budgetBox, int id) async {
   if (!projectBox.containsKey(id)) {
-    throw keyDoesNotExistException('The given key: $id does not exist in the projects hive');
+    throw KeyDoesNotExistException('The given key: $id does not exist in the projects hive');
   }
 
   var project = projectBox.get(id);
@@ -104,16 +103,16 @@ void deleteAllProjects(Box<Project> projectBox) async {
 
 /// Adds an [amount] to the allocated budget for a specific [project].
 ///
-/// If the [amount] is a negative number [negativeAllocationException] is thrown. If [amount] is
-/// is greater than the goal for the [project] then [allocatedGreaterThanGoalException] is thrown.
-/// If [amount] is greater than the amount of available budget unallocated [lackOfAvailableBudget]
+/// If the [amount] is a negative number [NegativeAllocationException] is thrown. If [amount] is
+/// is greater than the goal for the [project] then [AllocatedGreaterThanGoalException] is thrown.
+/// If [amount] is greater than the amount of available budget unallocated [LackOfAvailableBudget]
 /// is thrown.
 void addToAllocated(Box<Project> projectBox, Box<double> budgetBox, int id, double amount) {
 
   var project = projectBox.get(id);
 
   if (amount > project!.goal) {
-    throw allocatedGreaterThanGoalException('Cannot allocate R$amount to a project with goal: '
+    throw AllocatedGreaterThanGoalException('Cannot allocate R$amount to a project with goal: '
         'R${project.goal}');
   }
 
@@ -124,18 +123,18 @@ void addToAllocated(Box<Project> projectBox, Box<double> budgetBox, int id, doub
   allocated ??= 0;
 
   if ((budget - allocated) < amount) {
-    throw lackOfAvailableBudget('Not enough available budget to allocate.'
+    throw LackOfAvailableBudget('Not enough available budget to allocate.'
         '\nAvailable budget: R${budget-allocated}');
   }
 
   if (allocated + amount < 0) {
-    throw negativeAllocationException('Allocated amount cannot be negative');
+    throw NegativeAllocationException('Allocated amount cannot be negative');
   }
 
   allocated += amount;
   budgetBox.put(globals.allocated_key, allocated);
 
-  project.add_allocated(amount);
+  project.addAllocated(amount);
   project.save();
 }
 
@@ -213,7 +212,7 @@ List<Subscription> getPausedSubscriptions(Box<Subscription> subsBox, bool paused
 
 /// Makes all possible payments for the running subscriptions in [subsbox]
 ///
-/// Throws [stoppedSubscriptionsException] with subscriptions that couldn't be paid if there is
+/// Throws [StoppedSubscriptionsException] with subscriptions that couldn't be paid if there is
 /// insufficient funds to complete all subscription payments.
 /// TODO: Order the list such that subscribed income is before payments
 void paySubscriptions(Box<Subscription> subsBox, Box<Entry> entryBox, Box<double> budgetBox) {
@@ -226,22 +225,22 @@ void paySubscriptions(Box<Subscription> subsBox, Box<Entry> entryBox, Box<double
         newEntry(entryBox, budgetBox, sub.amount, 'Subscription: ${sub.name}');
         sub.makePayment();
       }
-    } on lackOfAvailableBudget {
+    } on LackOfAvailableBudget {
       List<Subscription> unpaid = subsBox.values.skip(i).toList();
       for (var sub in unpaid) {
         sub.pause = true;
       }
-      throw stoppedSubscriptionsException('Insufficient funds to pay all subscriptions', unpaid);
+      throw StoppedSubscriptionsException('Insufficient funds to pay all subscriptions', unpaid);
     }
   }
 }
 
 /// Removes a subscription with the Hive key [id]
 ///
-/// Throws a [keyDoesNotExistException] if the [id] does not exist in [subsBox]
+/// Throws a [KeyDoesNotExistException] if the [id] does not exist in [subsBox]
 void removeSubscription(Box<Subscription> subsBox, int id) async {
   if (!subsBox.containsKey(id)) {
-    throw keyDoesNotExistException('Subscription id: $id does not exist');
+    throw KeyDoesNotExistException('Subscription id: $id does not exist');
   }
 
   await subsBox.delete(id);

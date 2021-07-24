@@ -18,17 +18,15 @@ class NewProjectPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool showFab = MediaQuery.of(context).viewInsets.bottom==0.0;
     return Scaffold(
-      appBar: easyAppBar_back(),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              pageTitle(title),
-              projectForm('Goal'),
-            ],
-          ),
+      appBar: easyAppBarBack(),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            pageTitle(title),
+            projectForm('Goal'),
+          ],
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

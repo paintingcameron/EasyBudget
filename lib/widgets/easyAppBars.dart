@@ -1,21 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-AppBar easyAppBar() {
-  return AppBar(
-    centerTitle: true,
-    toolbarHeight: 50,
-    flexibleSpace: Padding(
-      padding: EdgeInsets.only(top: 35),
-      child: Container(
-          alignment: Alignment.center,
-          child: Icon(Icons.attach_money_outlined)
-      )
-    ),
-  );
-}
-
-AppBar easyAppBar_title(String title) {
+AppBar easyAppBar(String title) {
   return AppBar(
     centerTitle: true,
     toolbarHeight: 50,
@@ -23,7 +9,7 @@ AppBar easyAppBar_title(String title) {
   );
 }
 
-AppBar easyAppBar_back() {
+AppBar easyAppBarBack() {
   return AppBar(
     leading: Builder(
       builder: (context) {

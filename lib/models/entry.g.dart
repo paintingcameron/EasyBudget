@@ -32,7 +32,7 @@ class EntryAdapter extends TypeAdapter<Entry> {
       ..writeByte(1)
       ..write(obj._desc)
       ..writeByte(2)
-      ..write(obj._date_created);
+      ..write(obj._dateCreated);
   }
 
   @override

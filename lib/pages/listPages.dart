@@ -1,4 +1,3 @@
-import 'package:easybudget/bloc/bloc.dart';
 import 'package:easybudget/globals.dart';
 import 'package:easybudget/models/entry.dart';
 import 'package:easybudget/models/project.dart';
@@ -52,7 +51,7 @@ class ProjectListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: easyAppBar_title('${(open) ? 'Open' : 'Closed '} Projects'),
+      appBar: easyAppBar('${(open) ? 'Open' : 'Closed '} Projects'),
       body: StreamBuilder<List<Project>>(
         stream: bloc.projectStream,
         builder: (context, AsyncSnapshot<List<Project>> snapshot) {
@@ -83,7 +82,7 @@ class EntryListPage extends StatelessWidget {
     return Card(
       child: ListTile(
         title: Text(item.desc),
-        subtitle: Text('${DateFormat('dd/mm/yyyy').format(item.date_created)}'),
+        subtitle: Text('${DateFormat('dd/mm/yyyy').format(item.dateCreated)}'),
         trailing: Text(
           '$currency ${item.amount}',
           style: TextStyle(
@@ -99,7 +98,7 @@ class EntryListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       child: Scaffold(
-        appBar: easyAppBar_title('Deposits / Withdraws'),
+        appBar: easyAppBar('Deposits / Withdraws'),
         body: StreamBuilder<List<Entry>>(
           stream: bloc.entryStream,
           builder: (context, AsyncSnapshot<List<Entry>> snapshot) {

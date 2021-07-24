@@ -126,7 +126,7 @@ class _ProjectPageState extends State<ProjectPage> {
               onPressed: () async {
                 bool delete = await easyConfirmation(context, 'Delete ${project.name}?');
                 if (delete) {
-                  bloc.delete_project(project.key);
+                  bloc.deleteProject(project.key);
                   Navigator.of(context).pop();
                 }
               },
@@ -143,7 +143,7 @@ class _ProjectPageState extends State<ProjectPage> {
                 if (bought) {
                   setState(() {
                     project.bought = !project.bought;
-                    bloc.mark_bought(project.key, project.bought);
+                    bloc.markBought(project.key, project.bought);
                   });
                 }
               },
@@ -186,7 +186,7 @@ class _ProjectPageState extends State<ProjectPage> {
                 );
                 if (newGoal != null) {
                   setState(() {
-                    bloc.edit_goal(project.key, double.parse(newGoal));
+                    bloc.editGoal(project.key, double.parse(newGoal));
                   });
                 }
                 break;
@@ -198,16 +198,16 @@ class _ProjectPageState extends State<ProjectPage> {
                 if (newAllocation != null) {
                   setState(() {
                     try {
-                      bloc.add_to_allocated(project.key, double.parse(newAllocation));
-                    } on allocatedGreaterThanGoalException {
+                      bloc.addToAllocated(project.key, double.parse(newAllocation));
+                    } on AllocatedGreaterThanGoalException {
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                               content: Text('Allocated amount cannot be greater than goal')));
-                    } on lackOfAvailableBudget {
+                    } on LackOfAvailableBudget {
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                               content: Text('Insufficient available funds for allocation amount')));
-                    } on negativeAllocationException {
+                    } on NegativeAllocationException {
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                               content: Text('Allocated amount cannot be negative')));

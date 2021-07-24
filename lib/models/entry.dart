@@ -9,17 +9,17 @@ class Entry extends HiveObject {
   @HiveField(1)
   late String _desc;
   @HiveField(2)
-  late DateTime _date_created;
+  late DateTime _dateCreated;
 
   Entry.newEntry(double amount, String desc) {
     _amount = amount;
     _desc = desc;
-    _date_created = DateTime.now();
+    _dateCreated = DateTime.now();
   }
 
-  Entry(this._amount, this._desc, this._date_created);
+  Entry(this._amount, this._desc, this._dateCreated);
 
-  DateTime get date_created => _date_created;
+  DateTime get dateCreated => _dateCreated;
 
   String get desc => _desc;
 

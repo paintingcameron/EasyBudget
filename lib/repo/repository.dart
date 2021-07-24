@@ -19,7 +19,7 @@ class Repository {
   late final MoneyController requiredController;
   late final MoneyController availableController;
 
-  Future<void> init_boxes() async {
+  Future<void> initBoxes() async {
     Hive.registerAdapter(ProjectAdapter());
     Hive.registerAdapter(EntryAdapter());
     Hive.registerAdapter(SubscriptionAdapter());

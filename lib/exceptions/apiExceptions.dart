@@ -1,32 +1,32 @@
 import 'package:easybudget/models/subscription.dart';
 
-class keyDoesNotExistException implements Exception {
+class KeyDoesNotExistException implements Exception {
   String cause;
-  keyDoesNotExistException(this.cause);
+  KeyDoesNotExistException(this.cause);
 }
 
-class negativeAllocationException implements Exception {
+class NegativeAllocationException implements Exception {
   String cause;
-  negativeAllocationException(this.cause);
+  NegativeAllocationException(this.cause);
 }
 
-class lackOfAvailableBudget implements Exception {
+class LackOfAvailableBudget implements Exception {
   String cause;
-  lackOfAvailableBudget(this.cause);
+  LackOfAvailableBudget(this.cause);
 }
 
-class allocatedGreaterThanGoalException implements Exception {
+class AllocatedGreaterThanGoalException implements Exception {
   String cause;
-  allocatedGreaterThanGoalException(this.cause);
+  AllocatedGreaterThanGoalException(this.cause);
 }
 
-class negativeBudgetException implements Exception {
+class NegativeBudgetException implements Exception {
   String cause;
-  negativeBudgetException(this.cause);
+  NegativeBudgetException(this.cause);
 }
 
-class stoppedSubscriptionsException implements Exception {
+class StoppedSubscriptionsException implements Exception {
   String cause;
   List<Subscription> subsList;
-  stoppedSubscriptionsException(this.cause, this.subsList);
+  StoppedSubscriptionsException(this.cause, this.subsList);
 }

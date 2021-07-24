@@ -21,9 +21,9 @@ class ProjectAdapter extends TypeAdapter<Project> {
       fields[1] as String,
       fields[2] as double,
     )
-      .._allocated = fields[3] as double
-      .._bought = fields[4] as bool
-      .._date_created = fields[5] as DateTime;
+      ..allocated = fields[3] as double
+      ..bought = fields[4] as bool
+      ..dateCreated = fields[5] as DateTime;
   }
 
   @override
@@ -31,17 +31,17 @@ class ProjectAdapter extends TypeAdapter<Project> {
     writer
       ..writeByte(6)
       ..writeByte(0)
-      ..write(obj._name)
+      ..write(obj.name)
       ..writeByte(1)
-      ..write(obj._desc)
+      ..write(obj.desc)
       ..writeByte(2)
-      ..write(obj._goal)
+      ..write(obj.goal)
       ..writeByte(3)
-      ..write(obj._allocated)
+      ..write(obj.allocated)
       ..writeByte(4)
-      ..write(obj._bought)
+      ..write(obj.bought)
       ..writeByte(5)
-      ..write(obj._date_created);
+      ..write(obj.dateCreated);
   }
 
   @override

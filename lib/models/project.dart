@@ -5,58 +5,34 @@ part 'project.g.dart';
 @HiveType(typeId: 0)
 class Project extends HiveObject {
   @HiveField(0)
-  String _name;
+  String name;
   @HiveField(1)
-  String _desc;
+  String desc;
   @HiveField(2)
-  double _goal;
+  double goal;
   @HiveField(3)
-  late double _allocated;
+  late double allocated;
   @HiveField(4)
-  late bool _bought;
+  late bool bought;
   @HiveField(5)
-  late DateTime _date_created;
+  late DateTime dateCreated;
 
-  Project(this._name, this._desc, this._goal, {allocated = 0.0, bought = false}) {
-    _allocated = allocated;
-    _bought = bought;
-    _date_created = DateTime.now();
+  Project(this.name, this.desc, this.goal, {allocated = 0.0, bought = false}) {
+    this.allocated = allocated;
+    this.bought = bought;
+    this.dateCreated = DateTime.now();
   }
 
-  void add_allocated(double amount) => _allocated += amount;
-
-  set bought(bool value) {
-    _bought = value;
-  }
-
-  set allocated(double value) {
-    _allocated = value;
-  }
-
-  set goal(double goal) {
-    _goal = goal;
-  }
-
-  bool get bought => _bought;
-
-  double get allocated => _allocated;
-
-  double get goal => _goal;
-
-  String get desc => _desc;
-
-  String get name => _name;
-
-  DateTime get date_created => _date_created;
-
+  void addAllocated(double amount) => allocated += amount;
+  
   @override
   String toString() {
     return 'Project:'
-        '\n  Name:\t\t\t$_name'
-        '\n  Desc:\t\t\t$_desc'
-        '\n  Goal:\t\t\t$_goal'
-        '\n  Allocated:\t$_allocated'
-        '\n  Bought:\t\t$_bought';
+        '\n  Name:\t\t\t$name'
+        '\n  Desc:\t\t\t$desc'
+        '\n  Goal:\t\t\t$goal'
+        '\n  Allocated:\t$allocated'
+        '\n  Bought:\t\t$bought';
   }
 
 }
