@@ -2,6 +2,7 @@ import 'package:easybudget/bloc/bloc.dart';
 import 'package:easybudget/exceptions/apiExceptions.dart';
 import 'package:easybudget/main.dart';
 import 'package:easybudget/models/project.dart';
+import 'package:easybudget/models/subscription.dart';
 import 'package:easybudget/pages/listPages.dart';
 import 'package:easybudget/pages/deniedPermissions.dart';
 import 'package:easybudget/pages/newProjectPage.dart';
@@ -27,6 +28,7 @@ enum button_options {
   new_entry,
   new_project,
   quick_project,
+  new_subscription,
   subscriptions,
 }
 
@@ -155,6 +157,7 @@ class _HomePageState extends State<HomePage> {
           gridButton(button_options.closed_projects),
           gridButton(button_options.budget_entries),
           gridButton(button_options.quick_project),
+          gridButton(button_options.new_subscription),
           gridButton(button_options.subscriptions),
         ],
       ),
@@ -171,7 +174,8 @@ class _HomePageState extends State<HomePage> {
           (opt == button_options.closed_projects) ? Icon(Icons.verified_rounded) :
           (opt == button_options.budget_entries) ? Icon(Icons.payments) :
           (opt == button_options.quick_project) ? Icon(Icons.shopping_bag) :
-          Icon(Icons.subscriptions_outlined),
+          (opt == button_options.new_subscription) ? Icon(Icons.loupe) :
+              Icon(Icons.list_alt),
           onPressed: () async {
             switch (opt) {
               case button_options.open_projects:
@@ -262,14 +266,41 @@ class _HomePageState extends State<HomePage> {
                   );
                 }
                 break;
-              case button_options.subscriptions:
-                await Navigator.push(
+              case button_options.new_subscription:
+                List<String> results = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => NewSubscriptionPage(),
                   )
                 );
+
+                if (results.length == 6) {
+                  Subscription sub = await bloc.newSubscription(results[0], results[1],
+                      double.parse(results[2]), results[3], int.parse(results[4]),
+                      DateTime.parse(results[5]));
+
+                  Fluttertoast.showToast(
+                    msg: 'New Subscription: ${sub.name}',
+                    gravity: ToastGravity.BOTTOM,
+                    backgroundColor: Colors.black54,
+                    textColor: Colors.white
+                  );
+                } else {
+                  Fluttertoast.showToast(
+                      msg: 'Canceled',
+                      gravity: ToastGravity.BOTTOM,
+                      backgroundColor: Colors.black54,
+                      textColor: Colors.white
+                  );
+                }
                 break;
+              case button_options.subscriptions:
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SubscriptionListPage(),
+                  ),
+                );
             }
           },
         ),
@@ -278,7 +309,10 @@ class _HomePageState extends State<HomePage> {
           (opt == button_options.closed_projects) ? 'Closed Projects' :
           (opt == button_options.budget_entries) ? 'Deposits/Withdraws' :
           (opt == button_options.new_entry) ? 'New Entry' :
-          (opt == button_options.new_project) ? 'New Project' : 'Quick Buy',
+          (opt == button_options.new_project) ? 'New Project' :
+          (opt == button_options.quick_project) ? 'Quick Buy' :
+          (opt == button_options.new_subscription) ? '+ Subscription' :
+              'Subscriptions',
         )
       ],
     );

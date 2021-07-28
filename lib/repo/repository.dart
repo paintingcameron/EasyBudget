@@ -28,12 +28,13 @@ class Repository {
     entryBox = await Hive.openBox<Entry>(globals.entries_box);
     budgetBox = await Hive.openBox<double>(globals.budget_box);
     subsBox = await Hive.openBox<Subscription>(globals.subscriptionKey);
+    print('All Repo Boxes opened');
   }
 
   Future<void> initStream() async {
-    projectList = StreamList<Project>();
-    entriesList = StreamList<Entry>();
-    subsList = StreamList<Subscription>();
+    projectList = StreamList<Project>(projectBox.values.toList());
+    entriesList = StreamList<Entry>(entryBox.values.toList());
+    subsList = StreamList<Subscription>(subsBox.values.toList());
 
     var budget = budgetBox.get(globals.budget_key);
     var required = budgetBox.get(globals.required_key);
@@ -56,7 +57,17 @@ class Repository {
 
 
 class StreamList<T> {
-  final StreamController<List<T>> _controller = StreamController.broadcast();
+  late StreamController<List<T>> _controller;
+
+  StreamList(List<T> list) {
+    this._list = list;
+
+    _controller = StreamController.broadcast(
+      onListen: () {
+        _controller.sink.add(this._list);
+      }
+    );
+  }
 
   Stream<List<T>> get stream => _controller.stream;
 

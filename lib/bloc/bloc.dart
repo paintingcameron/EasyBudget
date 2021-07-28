@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:easybudget/api/tools.dart' as api;
+import 'package:easybudget/tools/budgetAPI.dart' as api;
 import 'package:easybudget/exceptions/apiExceptions.dart';
 import 'package:easybudget/models/entry.dart';
 import 'package:easybudget/models/project.dart';
@@ -109,10 +109,14 @@ class Bloc {
     sinkUnallocated();
   }
 
-  Future<void> newSubscription(String name, String desc, double amount, PeriodTypes type,
+  Future<Subscription> newSubscription(String name, String desc, double amount, String type,
       int period, DateTime startDate) async {
-    await api.newSubscription(repo.subsBox, name, desc, amount, type, period, startDate);
+    Subscription sub = await api.newSubscription(repo.subsBox, name, desc,
+        amount, type, period, startDate);
 
+    sinkAllSubscriptions();
+
+    return sub;
     //TODO: Figure out which types of subscriptions are sunk when there is a new subscription
   }
 

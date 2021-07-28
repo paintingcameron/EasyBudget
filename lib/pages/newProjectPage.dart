@@ -20,13 +20,15 @@ class NewProjectPage extends StatelessWidget {
     return Scaffold(
       appBar: easyAppBarBack(),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            pageTitle(title),
-            projectForm('Goal'),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              pageTitle(title),
+              projectForm('Goal'),
+            ],
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -69,7 +71,7 @@ class NewProjectPage extends StatelessWidget {
 
   Widget pageTitle(String title) {
     return Container(
-      height: 220,
+      height: 150,
       alignment: Alignment.center,
       child: Text(
         title,

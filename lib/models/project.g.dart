@@ -20,10 +20,9 @@ class ProjectAdapter extends TypeAdapter<Project> {
       fields[0] as String,
       fields[1] as String,
       fields[2] as double,
-    )
-      ..allocated = fields[3] as double
-      ..bought = fields[4] as bool
-      ..dateCreated = fields[5] as DateTime;
+      allocated: fields[3] as dynamic,
+      bought: fields[4] as dynamic,
+    )..dateCreated = fields[5] as DateTime;
   }
 
   @override

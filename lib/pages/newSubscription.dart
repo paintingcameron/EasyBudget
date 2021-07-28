@@ -1,16 +1,16 @@
 
-import 'package:easybudget/models/subscription.dart';
+import 'package:easybudget/tools/generalTools.dart';
 import 'package:easybudget/widgets/easyAppBars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
-final typeOptions = <PeriodTypes, String>{
-  PeriodTypes.Daily : 'Daily',
-  PeriodTypes.Weekly : 'Weekly',
-  PeriodTypes.Monthly: 'Monthly',
-  PeriodTypes.Annually : 'Annually',
+final typeOptions = <String>{
+  'day',
+  'week',
+  'month',
+  'year',
 };
 
 class NewSubscriptionPage extends StatefulWidget {
@@ -22,12 +22,18 @@ class _NewSubscriptionPageState extends State<NewSubscriptionPage> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
-
+  final TextEditingController periodController = TextEditingController();
   GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
-
-  PeriodTypes option = PeriodTypes.Daily;
-
+  String typeOption = 'day';
   DateTime startDate = DateTime.now();
+  bool positive = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    periodController.text = '1';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +44,7 @@ class _NewSubscriptionPageState extends State<NewSubscriptionPage> {
         child: Center(
           child: Column (
             children: [
-              SizedBox(height: 50,),
+              SizedBox(height: 40,),
               Text(
                 'New Subscription',
                 style: TextStyle(
@@ -53,7 +59,7 @@ class _NewSubscriptionPageState extends State<NewSubscriptionPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      SizedBox(height: 50),
+                      SizedBox(height: 40),
                       TextFormField(
                         decoration: const InputDecoration(
                           labelText: 'Name',
@@ -68,13 +74,13 @@ class _NewSubscriptionPageState extends State<NewSubscriptionPage> {
                           return null;
                         },
                       ),
-                      SizedBox(height: 50,),
+                      SizedBox(height: 40,),
                       TextFormField(
                         decoration: const InputDecoration(
                           labelText: 'Description'
                         ),
                         controller: descController,
-                        maxLines: 3,
+                        maxLines: 2,
                         keyboardType: TextInputType.multiline,
                         validator: (desc) {
                           if (desc == null || desc.isEmpty) {
@@ -83,11 +89,75 @@ class _NewSubscriptionPageState extends State<NewSubscriptionPage> {
                           return null;
                         },
                       ),
-                      SizedBox(height: 50,),
+                      SizedBox(height: 40,),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
+                          Text(
+                            'Every',
+                            style: TextStyle(
+                              fontSize: 17,
+                            ),
+                          ),
+                          SizedBox(width: 20,),
+                          Container(
+                            width: 70,
+                            child: TextFormField(
+                              decoration: const InputDecoration(
+                                labelText: 'Period',
+                              ),
+                              controller: periodController,
+                              keyboardType: TextInputType.number,
+                              validator: (period) {
+                                if (period == null || period.isEmpty) {
+                                  return '';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          SizedBox(width: 20),
+                          Container(
+                            width: 100,
+                            child: DropdownButton<String>(
+                              isExpanded: true,
+                              value: typeOption,
+                              items: typeOptions.map((e) {
+                                return DropdownMenuItem<String>(
+                                  value: e,
+                                  child: Text(
+                                    '$e${(periodController.text != '1') ? 's' : ''}',
+                                  ),
+                                );
+                              }).toList(),
+                              hint: Text(
+                                'Please choose a subscription type'
+                              ),
+                              onChanged: (type) {
+                                setState(() {
+                                  typeOption = type!;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              (positive) ? Icons.add : Icons.remove,
+                              color: Colors.black,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                positive = !positive;
+                              });
+                            },
+                            iconSize: 40,
+                          ),
                           Container(
                             width: 100,
                             child: TextFormField(
@@ -100,41 +170,15 @@ class _NewSubscriptionPageState extends State<NewSubscriptionPage> {
                               inputFormatters: [FilteringTextInputFormatter.digitsOnly,],
                               validator: (amount) {
                                 if (amount == null || amount.isEmpty) {
-                                  return 'Please enter a subscription amount';
+                                  return '';
                                 }
                                 return null;
                               },
                             ),
                           ),
-                          SizedBox(width:50),
-                          Container(
-                            width: 100,
-                            child: DropdownButton<PeriodTypes>(
-                              isExpanded: true,
-                              value: option,
-                              items: typeOptions.keys.toList().map((e) {
-                                String? str = typeOptions[e];
-                                str ??= 'Daily';
-                                return DropdownMenuItem<PeriodTypes>(
-                                  value: e,
-                                  child: Text(
-                                    str,
-                                  ),
-                                );
-                              }).toList(),
-                              hint: Text(
-                                'Please choose a subscription type'
-                              ),
-                              onChanged: (type) {
-                                setState(() {
-                                  option = type!;
-                                });
-                              },
-                            ),
-                          ),
                         ],
                       ),
-                      SizedBox(height: 50,),
+                      SizedBox(height: 30,),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
@@ -153,6 +197,9 @@ class _NewSubscriptionPageState extends State<NewSubscriptionPage> {
                                 firstDate: startDate,
                                 lastDate: DateTime(startDate.year+50, startDate.month, startDate.day),
                               );
+
+                              picked ??= DateTime.now();
+                              startDate = picked;
                             },
                             icon: Icon(Icons.calendar_today),
                           ),
@@ -189,7 +236,9 @@ class _NewSubscriptionPageState extends State<NewSubscriptionPage> {
             heroTag: 'btn_save',
             onPressed: () {
               if (_formKey.currentState!.validate()) {
-                Navigator.of(context).pop([nameController.text, descController.text, amountController.text]);
+                Navigator.of(context).pop([nameController.text, descController.text,
+                  ((positive) ? '' : '-')+amountController.text, typeOption, periodController.text,
+                  formatDate(startDate)]);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(

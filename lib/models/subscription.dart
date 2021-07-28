@@ -1,13 +1,7 @@
 import 'package:hive/hive.dart';
+import 'package:easybudget/tools/generalTools.dart';
 
 part 'subscription.g.dart';
-
-enum PeriodTypes {
-  Daily,
-  Weekly,
-  Monthly,
-  Annually
-}
 
 @HiveType(typeId: 2)
 class Subscription extends HiveObject {
@@ -18,9 +12,9 @@ class Subscription extends HiveObject {
   @HiveField(2)
   late double _amount;
   @HiveField(3)
-  late var _period;   //(type is Daily or Weekly) ? Duration : int
+  late int _period;
   @HiveField(4)
-  late PeriodTypes _type;
+  late String _type;
   @HiveField(5)
   late DateTime _startDate;
   @HiveField(6)
@@ -32,26 +26,16 @@ class Subscription extends HiveObject {
       this._startDate, this._lastPaid, this._paused);
 
   Subscription.newSub(String name, String desc, double amount, DateTime startDate,
-      int period, PeriodTypes type) {
+      int period, String type) {
     _name = name;
     _desc = desc;
     _amount = amount;
     _type = type;
     _startDate = startDate;
+    _period = period;
+    _lastPaid = startDate.clone();
 
     _paused = true;
-
-    switch (type) {
-      case PeriodTypes.Daily:
-        _period = Duration(days: period);
-        break;
-      case PeriodTypes.Weekly:
-        _period = Duration(days: period*7);
-        break;
-      case PeriodTypes.Monthly:
-      case PeriodTypes.Annually:
-        _period = _period;
-    }
   }
 
   String get name => _name;
@@ -59,40 +43,54 @@ class Subscription extends HiveObject {
   double get amount => _amount;
   DateTime get startDate => _startDate;
   bool get paused => _paused;
+  int get period => _period;
+  String get type => _type;
+  DateTime get lastPaid => _lastPaid;
 
   set pause(bool pause) {
     this._paused = pause;
     this.save();
   }
 
+  DateTime nextPayment() {
+    switch(_type) {
+      case 'day':
+        return _lastPaid.add(Duration(days: _period));
+      case 'week':
+        return _lastPaid.add(Duration(days: _period*7));
+      case 'month':
+        return DateTime(_lastPaid.year, _lastPaid.month+_period, _lastPaid.day);
+      default:
+        return DateTime(_lastPaid.year+_period, _lastPaid.month, _lastPaid.day);
+    }
+  }
+
   bool paymentDue(DateTime now) {
     if (_paused) return false;
 
-    switch (_type) {
-      case PeriodTypes.Daily:
-      case PeriodTypes.Weekly:
-        return _lastPaid.add(_period).isBefore(now);
-      case PeriodTypes.Monthly:
-        return DateTime(_lastPaid.year, _lastPaid.month+1, _lastPaid.day).isBefore(now);
-      case PeriodTypes.Annually:
-        return DateTime(_lastPaid.year+1, _lastPaid.month, _lastPaid.day).isBefore(now);
+    if (_startDate.equal(now) && _lastPaid.equal(_startDate)) {
+      return true;
     }
+
+    return this.nextPayment().isBefore(now);
   }
 
   void makePayment() {
     switch (_type) {
-      case PeriodTypes.Daily:
-      case PeriodTypes.Weekly:
-        _lastPaid = _lastPaid.add(_period);
+      case 'day':
+        _lastPaid = _lastPaid.add(Duration(days: _period));
         break;
-      case PeriodTypes.Monthly:
+      case 'week':
+        _lastPaid = _lastPaid.add(Duration(days: _period*7));
+        break;
+      case 'month':
         if (_lastPaid.month == 12) {
           _lastPaid = DateTime(_lastPaid.year+1, 1, _lastPaid.day);
         } else {
           _lastPaid = DateTime(_lastPaid.year, _lastPaid.month+1, _lastPaid.day);
         }
         break;
-      case PeriodTypes.Annually:
+      default:
         _lastPaid = DateTime(_lastPaid.year+1, _lastPaid.month, _lastPaid.day);
     }
   }

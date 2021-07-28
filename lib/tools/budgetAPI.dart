@@ -189,7 +189,7 @@ void markBought(Box<Project> projectBox, Box<double> budgetBox, int id, bool bou
 //--------------------------------------------------------------------------------------------------
 
 Future<Subscription> newSubscription(Box<Subscription> subsBox, String name,
-    String desc, double amount, PeriodTypes type, int period, DateTime startDate) async {
+    String desc, double amount, String type, int period, DateTime startDate) async {
 
   Subscription sub = Subscription.newSub(name, desc, amount, startDate, period, type);
 
