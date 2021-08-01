@@ -33,6 +33,7 @@ Future<Entry> newEntry(Box<Entry> entryBox, Box<double> budgetBox,
 
   await entryBox.add(entry);
 
+  print('new Budget: $budget');
   await budgetBox.put(globals.budget_key, (budget + amount));
 
   return entry;
@@ -215,17 +216,18 @@ List<Subscription> getPausedSubscriptions(Box<Subscription> subsBox, bool paused
 /// Throws [StoppedSubscriptionsException] with subscriptions that couldn't be paid if there is
 /// insufficient funds to complete all subscription payments.
 /// TODO: Order the list such that subscribed income is before payments
-void paySubscriptions(Box<Subscription> subsBox, Box<Entry> entryBox, Box<double> budgetBox) {
+Future<void> paySubscriptions(Box<Subscription> subsBox, Box<Entry> entryBox, Box<double> budgetBox) async {
   DateTime now = DateTime.now();
 
   for (int i = 0; i < subsBox.length; i++) {
     Subscription sub = subsBox.values.elementAt(i);
     try {
       if (sub.paymentDue(now)) {
-        newEntry(entryBox, budgetBox, sub.amount, 'Subscription: ${sub.name}');
+        await newEntry(entryBox, budgetBox, sub.amount, 'Subscription: ${sub.name}');
         sub.makePayment();
       }
-    } on LackOfAvailableBudget {
+    } on NegativeBudgetException {
+      print('insufficient budget');
       List<Subscription> unpaid = subsBox.values.skip(i).toList();
       for (var sub in unpaid) {
         sub.pause = true;

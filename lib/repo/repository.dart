@@ -55,7 +55,6 @@ class Repository {
   }
 }
 
-
 class StreamList<T> {
   late StreamController<List<T>> _controller;
 

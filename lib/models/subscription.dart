@@ -35,7 +35,7 @@ class Subscription extends HiveObject {
     _period = period;
     _lastPaid = startDate.clone();
 
-    _paused = true;
+    _paused = false;
   }
 
   String get name => _name;
@@ -93,5 +93,7 @@ class Subscription extends HiveObject {
       default:
         _lastPaid = DateTime(_lastPaid.year+1, _lastPaid.month, _lastPaid.day);
     }
+
+    this.save();
   }
 }

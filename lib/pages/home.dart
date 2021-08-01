@@ -40,12 +40,13 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late Future<dynamic> _blocPermission;
 
-  Future<dynamic> _getBlocPermissions() async {
+  Future<dynamic> _initBloc() async {
     if (await Permission.storage.request().isGranted) {
       var dir = await getApplicationDocumentsDirectory();
       Hive.init(dir.path);
       bloc = Bloc(await getApplicationDocumentsDirectory());
       await bloc.initRepo();
+      await bloc.makeSubscriptionPayments();
       return bloc;
     } else {
       return false;
@@ -55,7 +56,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _blocPermission = _getBlocPermissions();
+    _blocPermission = _initBloc();
   }
 
   @override

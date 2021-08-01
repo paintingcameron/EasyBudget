@@ -24,4 +24,11 @@ class Entry extends HiveObject {
   String get desc => _desc;
 
   double get amount => _amount;
+
+  @override
+  String toString() {
+    return 'Entry:'
+        '\n\t Description:\t$desc'
+        '\n\t Amount:\t$amount';
+  }
 }

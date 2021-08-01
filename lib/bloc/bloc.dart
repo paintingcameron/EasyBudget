@@ -62,6 +62,10 @@ class Bloc {
   void sinkAllSubscriptions() {
     repo.subsList.setList(repo.subsBox.values.toList());
   }
+  
+  void sinkPausedSubscriptions(bool paused) {
+    repo.subsList.setList(repo.subsBox.values.where((sub) => sub.paused == paused).toList());
+  }
 
   Future<Project> newProject(String name, String desc, double goal) async {
     Project project = await api.newProject(repo.projectBox, repo.budgetBox, name, desc, goal);
@@ -107,6 +111,7 @@ class Bloc {
 
     sinkBudget();
     sinkUnallocated();
+    sinkAllEntries();
   }
 
   Future<Subscription> newSubscription(String name, String desc, double amount, String type,
@@ -117,16 +122,14 @@ class Bloc {
     sinkAllSubscriptions();
 
     return sub;
-    //TODO: Figure out which types of subscriptions are sunk when there is a new subscription
   }
 
-  Future<dynamic> makeSubscriptionPayments() async {
-
+  Future<List<Subscription>?> makeSubscriptionPayments() async {
     var out;
 
     try {
-      api.paySubscriptions(repo.subsBox, repo.entryBox, repo.budgetBox);
-      out = true;
+      await api.paySubscriptions(repo.subsBox, repo.entryBox, repo.budgetBox);
+      out = null;
     } on StoppedSubscriptionsException catch (e) {
       out = e.subsList;
     }
@@ -135,6 +138,12 @@ class Bloc {
     sinkUnallocated();
 
     return out;
+  }
+
+  void deleteSubscription(int id) {
+    api.removeSubscription(repo.subsBox, id);
+
+    sinkAllSubscriptions();
   }
 
   void pauseSubscription(int id) => api.pauseSubscription(repo.subsBox, id);

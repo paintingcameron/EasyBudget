@@ -27,10 +27,14 @@ abstract class ListPage<T> extends StatelessWidget {
 
   Widget getListItem(T item, BuildContext context);
 
+  AppBar listAppBar() {
+    return easyAppBar(title);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: easyAppBar(title),
+      appBar: listAppBar(),
       body: StreamBuilder<List<T>>(
         stream: listStream,
         builder: (context, AsyncSnapshot<List<T>> snapshot) {
@@ -48,6 +52,49 @@ abstract class ListPage<T> extends StatelessWidget {
 
 class SubscriptionListPage extends ListPage<Subscription> {
   SubscriptionListPage() : super('Subscriptions', bloc.subscriptionStream);
+
+  @override
+  AppBar listAppBar() {
+    return AppBar(
+      centerTitle: true,
+      toolbarHeight: 50,
+      title: Text(title),
+      actions: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(right: 10.0),
+          child: PopupMenuButton(
+            icon: Icon(Icons.filter_list),
+            itemBuilder: (context) => [
+              PopupMenuItem<int>(
+                value: 0,
+                child: Text('All'),
+              ),
+              PopupMenuItem<int>(
+                value: 1,
+                child: Text('Paused'),
+              ),
+              PopupMenuItem<int>(
+                value: 2,
+                child: Text('Running'),
+              ),
+            ],
+            onSelected: (item) {
+              switch(item) {
+                case 0:
+                  bloc.sinkAllSubscriptions();
+                  break;
+                case 1:
+                  bloc.sinkPausedSubscriptions(true);
+                  break;
+                case 2:
+                  bloc.sinkPausedSubscriptions(false);
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget getListItem(Subscription item, BuildContext context) {
@@ -108,9 +155,7 @@ class ProjectListPage extends ListPage<Project> {
 }
 
 class EntryListPage extends ListPage<Entry> {
-
   EntryListPage() : super('Deposits / Withdraws', bloc.entryStream);
-
 
   Widget getListItem(Entry item, BuildContext context) {
     return Card(
