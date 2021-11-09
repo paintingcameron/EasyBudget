@@ -45,6 +45,8 @@ class Repository {
 
     budgetController = MoneyController(budget);
     requiredController = MoneyController(required);
+    print(budget);
+    print(allocated);
     availableController = MoneyController(budget - allocated);
   }
 

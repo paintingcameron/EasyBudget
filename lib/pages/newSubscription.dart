@@ -1,5 +1,4 @@
 
-import 'package:easybudget/tools/generalTools.dart';
 import 'package:easybudget/widgets/easyAppBars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -238,7 +237,7 @@ class _NewSubscriptionPageState extends State<NewSubscriptionPage> {
               if (_formKey.currentState!.validate()) {
                 Navigator.of(context).pop([nameController.text, descController.text,
                   ((positive) ? '' : '-')+amountController.text, typeOption, periodController.text,
-                  formatDate(startDate)]);
+                  DateFormat('dd/MM/yyyy').format(startDate)]);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(

@@ -25,13 +25,14 @@ class SubscriptionAdapter extends TypeAdapter<Subscription> {
       fields[5] as DateTime,
       fields[6] as DateTime,
       fields[7] as bool,
+      fields[8] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, Subscription obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj._name)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class SubscriptionAdapter extends TypeAdapter<Subscription> {
       ..writeByte(6)
       ..write(obj._lastPaid)
       ..writeByte(7)
-      ..write(obj._paused);
+      ..write(obj._paused)
+      ..writeByte(8)
+      ..write(obj._initPay);
   }
 
   @override

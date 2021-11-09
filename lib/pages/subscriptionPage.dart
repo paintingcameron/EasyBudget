@@ -2,12 +2,13 @@ import 'package:easybudget/globals.dart';
 import 'package:easybudget/main.dart';
 import 'package:easybudget/models/entry.dart';
 import 'package:easybudget/models/subscription.dart';
-import 'package:easybudget/tools/generalTools.dart';
 import 'package:easybudget/widgets/easyAppBars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+
+DateFormat formatter = DateFormat('dd/MM/yyyy');
 
 class SubscriptionPage extends StatefulWidget {
   final Subscription sub;
@@ -24,6 +25,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
+    print(DateTime.now().difference(sub.lastPaid).inMicroseconds.abs() /
+        sub.nextPayment().difference(sub.lastPaid).inMicroseconds.abs());
+    print(DateTime.now().difference(sub.lastPaid).inMicroseconds.abs());
+    print(sub.nextPayment().difference(sub.lastPaid).inMicroseconds.abs());
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -33,7 +38,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           children: [
             topView(),
             Divider(),
-            // entryList(),
+            entryList(),
           ],
         ),
       ),
@@ -84,7 +89,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           child: Align(
             alignment: Alignment.topRight,
             child: Text(
-              'Started: ${prettifyDate(sub.startDate)}',
+              'Started: ${formatter.format(sub.startDate)}',
               style: TextStyle(
                 color: Colors.grey,
               ),
@@ -133,6 +138,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   Widget subscriptionProgress() {
+    int nextDuration = sub.nextPayment().difference(sub.lastPaid).inMicroseconds.abs();
+    int sinceDuration = DateTime.now().difference(sub.lastPaid).inMicroseconds.abs();
     return Column(
       children: [
         Padding(
@@ -140,15 +147,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(prettifyDate(sub.lastPaid)),
-              Text(prettifyDate(sub.nextPayment())),
+              Text(formatter.format(sub.lastPaid)),
+              Text(formatter.format(sub.nextPayment())),
             ],
           ),
         ),
         LinearPercentIndicator(
           lineHeight: 20,
-          percent: DateTime.now().difference(sub.lastPaid).inMicroseconds.abs() /
-                    sub.nextPayment().difference(sub.lastPaid).inMicroseconds.abs(),
+          percent:  (nextDuration == 0) ? 1 : sinceDuration/nextDuration,
           progressColor: Color(moneyGreen),
         ),
       ],
@@ -156,54 +162,95 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   Widget entryList() {
+    List<Entry> entries = bloc.getSubEntries(sub.key);
+    print(entries);
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 250,
-      alignment: Alignment.center,
-      child: StreamBuilder(
-        stream: bloc.entryStream,
-        builder: (context, AsyncSnapshot<List<Entry>> snapshot) {
-          if (snapshot.hasData) {
-            List<Entry> entries = snapshot.data!;
-            return Container(
-              decoration: BoxDecoration(
-                  boxShadow: [
-                    const BoxShadow(
-                      color: Colors.grey,
-                    ),
-                    const BoxShadow(
-                      color: Colors.white,
-                      spreadRadius: -1.0,
-                      blurRadius: 1,
-                    )
-                  ]
+      decoration: BoxDecoration(
+          boxShadow: [
+            const BoxShadow(
+              color: Colors.grey,
+            ),
+            const BoxShadow(
+              color: Colors.white,
+              spreadRadius: -1.0,
+              blurRadius: 1,
+            )
+          ]
+      ),
+      child: ListView.builder(
+        itemCount: entries.length,
+        itemBuilder: (BuildContext context, int index) {
+          Entry item = entries[index];
+          return Card(
+            child: ListTile(
+              title: Text(item.desc),
+              subtitle: Text(
+                  '${DateFormat('dd/mm/yyyy').format(item.dateCreated)}'),
+              trailing: Text(
+                '$currency ${item.amount}',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
               ),
-              child: ListView.builder(
-                itemCount: entries.length,
-                itemBuilder: (BuildContext context, int index) {
-                  Entry item = entries[index];
-                  return Card(
-                    child: ListTile(
-                      title: Text(item.desc),
-                      subtitle: Text(
-                          '${DateFormat('dd/mm/yyyy').format(item.dateCreated)}'),
-                      trailing: Text(
-                        '$currency ${item.amount}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ),
-                  );
-                }
-              ),
-            );
-          } else {
-            return Text('No Payments Yet');
-          }
+            ),
+          );
         },
       ),
     );
   }
+
+  // Widget entryList() {
+  //   return Container(
+  //     width: MediaQuery.of(context).size.width,
+  //     height: 250,
+  //     alignment: Alignment.center,
+  //     child: StreamBuilder(
+  //       stream: bloc.entryStream,
+  //       builder: (context, AsyncSnapshot<List<Entry>> snapshot) {
+  //         if (snapshot.hasData) {
+  //           List<Entry> entries = snapshot.data!;
+  //           return Container(
+  //             decoration: BoxDecoration(
+  //                 boxShadow: [
+  //                   const BoxShadow(
+  //                     color: Colors.grey,
+  //                   ),
+  //                   const BoxShadow(
+  //                     color: Colors.white,
+  //                     spreadRadius: -1.0,
+  //                     blurRadius: 1,
+  //                   )
+  //                 ]
+  //             ),
+  //             child: ListView.builder(
+  //               itemCount: entries.length,
+  //               itemBuilder: (BuildContext context, int index) {
+  //                 Entry item = entries[index];
+  //                 return Card(
+  //                   child: ListTile(
+  //                     title: Text(item.desc),
+  //                     subtitle: Text(
+  //                         '${DateFormat('dd/mm/yyyy').format(item.dateCreated)}'),
+  //                     trailing: Text(
+  //                       '$currency ${item.amount}',
+  //                       style: TextStyle(
+  //                         fontWeight: FontWeight.bold,
+  //                         fontSize: 20,
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 );
+  //               }
+  //             ),
+  //           );
+  //         } else {
+  //           return Text('No Payments Yet');
+  //         }
+  //       },
+  //     ),
+  //   );
+  // }
 }

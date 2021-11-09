@@ -12,6 +12,8 @@ import '../globals.dart' as globals;
 List<Entry> getBudgetEntries(Box<Entry> entryBox) {
   var entries = entryBox.values.toList();
 
+  print(entries);
+
   return entries;
 }
 
@@ -20,16 +22,19 @@ List<Entry> getBudgetEntries(Box<Entry> entryBox) {
 /// The new [amount] with its description, [desc], is saved into the [entryBox] and the updated
 /// budget is saved to [budgetBox].
 Future<Entry> newEntry(Box<Entry> entryBox, Box<double> budgetBox,
-    double amount, String desc) async {
+    double amount, String desc, DateTime created, {subID = -1}) async {
 
   var budget = budgetBox.get(globals.budget_key);
   budget ??= 0;
 
-  if (budget + amount < 0) {
+  if (budget - amount < 0) {
     throw new NegativeBudgetException('Budget cannot be negative');
   }
 
-  var entry = Entry.newEntry(amount, desc);
+  print(created);
+
+  var entry = Entry.newEntry(amount, desc, created, subID: subID);
+  print('new entry: $entry');
 
   await entryBox.add(entry);
 
@@ -211,7 +216,7 @@ List<Subscription> getPausedSubscriptions(Box<Subscription> subsBox, bool paused
   return subs;
 }
 
-/// Makes all possible payments for the running subscriptions in [subsbox]
+/// Makes all possible payments for the running subscriptions in [subsBox]
 ///
 /// Throws [StoppedSubscriptionsException] with subscriptions that couldn't be paid if there is
 /// insufficient funds to complete all subscription payments.
@@ -222,8 +227,10 @@ Future<void> paySubscriptions(Box<Subscription> subsBox, Box<Entry> entryBox, Bo
   for (int i = 0; i < subsBox.length; i++) {
     Subscription sub = subsBox.values.elementAt(i);
     try {
-      if (sub.paymentDue(now)) {
-        await newEntry(entryBox, budgetBox, sub.amount, 'Subscription: ${sub.name}');
+      print(sub.key);
+      while (sub.paymentDue(now)) {
+        await newEntry(entryBox, budgetBox, sub.amount, 'Subscription: ${sub.name}',
+            sub.nextPayment(), subID: sub.key);
         sub.makePayment();
       }
     } on NegativeBudgetException {
@@ -254,4 +261,8 @@ void pauseSubscription(Box<Subscription> subsBox, int id) {
   sub!.pause = !sub.paused;
 
   sub.save();
+}
+
+List<Entry> getSubEntries(Box<Entry> entryBox, int id) {
+  return entryBox.values.where((entry) => entry.subID == id).toList();
 }

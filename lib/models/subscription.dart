@@ -21,9 +21,11 @@ class Subscription extends HiveObject {
   late DateTime _lastPaid;
   @HiveField(7)
   late bool _paused;
+  @HiveField(8)
+  late bool _initPay;
 
   Subscription(this._name, this._desc, this._amount, this._period, this._type,
-      this._startDate, this._lastPaid, this._paused);
+      this._startDate, this._lastPaid, this._paused, this._initPay);
 
   Subscription.newSub(String name, String desc, double amount, DateTime startDate,
       int period, String type) {
@@ -36,6 +38,7 @@ class Subscription extends HiveObject {
     _lastPaid = startDate.clone();
 
     _paused = false;
+    _initPay = false;
   }
 
   String get name => _name;
@@ -53,13 +56,17 @@ class Subscription extends HiveObject {
   }
 
   DateTime nextPayment() {
+    if (!_initPay) {
+      return _startDate;
+    }
     switch(_type) {
       case 'day':
         return _lastPaid.add(Duration(days: _period));
       case 'week':
         return _lastPaid.add(Duration(days: _period*7));
       case 'month':
-        return DateTime(_lastPaid.year, _lastPaid.month+_period, _lastPaid.day);
+        int moreMonths = _lastPaid.month + _period;
+        return DateTime(_lastPaid.year + moreMonths~/12 , moreMonths%12, _lastPaid.day);
       default:
         return DateTime(_lastPaid.year+_period, _lastPaid.month, _lastPaid.day);
     }
@@ -68,30 +75,19 @@ class Subscription extends HiveObject {
   bool paymentDue(DateTime now) {
     if (_paused) return false;
 
-    if (_startDate.equal(now) && _lastPaid.equal(_startDate)) {
-      return true;
+    if (_initPay) {
+      DateTime nextPay = this.nextPayment();
+      return nextPay.equal(now) || nextPay.isBefore(now);
+    } else {
+      return _startDate.equal(now) || _startDate.isBefore(now);
     }
-
-    return this.nextPayment().isBefore(now);
   }
 
   void makePayment() {
-    switch (_type) {
-      case 'day':
-        _lastPaid = _lastPaid.add(Duration(days: _period));
-        break;
-      case 'week':
-        _lastPaid = _lastPaid.add(Duration(days: _period*7));
-        break;
-      case 'month':
-        if (_lastPaid.month == 12) {
-          _lastPaid = DateTime(_lastPaid.year+1, 1, _lastPaid.day);
-        } else {
-          _lastPaid = DateTime(_lastPaid.year, _lastPaid.month+1, _lastPaid.day);
-        }
-        break;
-      default:
-        _lastPaid = DateTime(_lastPaid.year+1, _lastPaid.month, _lastPaid.day);
+    _lastPaid = nextPayment();
+
+    if (!_initPay) {
+      _initPay = true;
     }
 
     this.save();

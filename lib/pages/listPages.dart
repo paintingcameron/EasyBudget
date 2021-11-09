@@ -20,7 +20,7 @@ abstract class ListPage<T> extends StatelessWidget {
     return ListView.builder(
       itemCount: lst.length,
       itemBuilder: (BuildContext context, int index) {
-        return getListItem(lst[index], context);
+        return getListItem(lst.reversed.toList()[index], context);
       },
     );
   }
@@ -109,11 +109,23 @@ class SubscriptionListPage extends ListPage<Subscription> {
         child: ListTile(
           title: Text(item.name),
           subtitle: Text(item.desc),
-          trailing: Text(
-            '${item.amount}',
-            style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
+          trailing: Container(
+            width: 110,
+            child: Row(
+              children: [
+                Text(
+                  '${item.period} ${(item.type=='day')?'d':
+                  (item.type=='week')?'w':
+                  (item.type=='month')?'m':'y'} / ',
+                ),
+                Text(
+                  '$currency ${item.amount}',
+                  style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -161,7 +173,7 @@ class EntryListPage extends ListPage<Entry> {
     return Card(
       child: ListTile(
         title: Text(item.desc),
-        subtitle: Text('${DateFormat('dd/mm/yyyy').format(item.dateCreated)}'),
+        subtitle: Text('${DateFormat('dd/MM/yyyy').format(item.dateCreated)}'),
         trailing: Text(
           '$currency ${item.amount}',
           style: TextStyle(

@@ -12,6 +12,7 @@ import 'package:easybudget/widgets/easyWidgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -276,9 +277,10 @@ class _HomePageState extends State<HomePage> {
                 );
 
                 if (results.length == 6) {
+                  print(results[5]);
                   Subscription sub = await bloc.newSubscription(results[0], results[1],
                       double.parse(results[2]), results[3], int.parse(results[4]),
-                      DateTime.parse(results[5]));
+                      DateFormat('dd/MM/yyyy').parse(results[5]));
 
                   Fluttertoast.showToast(
                     msg: 'New Subscription: ${sub.name}',
@@ -407,10 +409,11 @@ class _TopViewState extends State<TopView> {
   }
 
   Widget availableChart() {
+    var percent = (budget == 0) ? 0.0 : available/budget;
     return CircularPercentIndicator(
       radius: 320,
       lineWidth: 20,
-      percent: (budget == 0) ? 0 : available/budget,
+      percent: (percent <= 0) ? 0 : percent,
       center: Text(
         'Available:\n$currency $available',
         textAlign: TextAlign.center,

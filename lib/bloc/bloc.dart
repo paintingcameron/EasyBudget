@@ -35,7 +35,7 @@ class Bloc {
   }
 
   void sinkAllEntries() {
-    repo.entriesList.setList(repo.entryBox.values.toList());
+    repo.entriesList.setList(api.getBudgetEntries(repo.entryBox));
   }
 
   void sinkBudget() {
@@ -107,7 +107,7 @@ class Bloc {
   }
 
   Future<void> newEntry(double amount, String desc) async {
-    await api.newEntry(repo.entryBox, repo.budgetBox, amount, desc);
+    await api.newEntry(repo.entryBox, repo.budgetBox, amount, desc, DateTime.now());
 
     sinkBudget();
     sinkUnallocated();
@@ -136,6 +136,7 @@ class Bloc {
 
     sinkBudget();
     sinkUnallocated();
+    sinkAllEntries();
 
     return out;
   }
@@ -147,6 +148,8 @@ class Bloc {
   }
 
   void pauseSubscription(int id) => api.pauseSubscription(repo.subsBox, id);
+
+  List<Entry> getSubEntries(int id) => api.getSubEntries(repo.entryBox, id);
 
   void dispose()  {
     repo.projectList.dispose();

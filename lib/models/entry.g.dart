@@ -20,19 +20,22 @@ class EntryAdapter extends TypeAdapter<Entry> {
       fields[0] as double,
       fields[1] as String,
       fields[2] as DateTime,
+      fields[3] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, Entry obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj._amount)
       ..writeByte(1)
       ..write(obj._desc)
       ..writeByte(2)
-      ..write(obj._dateCreated);
+      ..write(obj._dateCreated)
+      ..writeByte(3)
+      ..write(obj._subID);
   }
 
   @override
